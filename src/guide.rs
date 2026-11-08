@@ -2,12 +2,10 @@ use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 pub struct NortonGuide {
-
     path: PathBuf,
 }
 
 impl NortonGuide {
-
     /// The length of a title in the header.
     pub const TITLE_LENGTH: usize = 40;
     /// The length of a line in the credits, in the header.

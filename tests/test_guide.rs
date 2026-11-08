@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use norton_guide::NortonGuide;
+use std::path::PathBuf;
 
 #[test]
 fn test_open_non_existent_file_fails() {
