@@ -4,6 +4,7 @@ use std::path::Path;
 
 const EXISTS_PATH: &str = "tests/guides/eg.ng";
 const DOES_NOT_EXIST_PATH: &str = "tests/guides/does_not_exist.ng";
+const EMPTY_FILE_PATH: &str = "tests/guides/empty.ng";
 
 #[test]
 fn test_open_non_existent_file_fails() {
@@ -25,6 +26,34 @@ fn test_path_method_returns_correct_path() {
     let result = NortonGuide::open(expected_path).unwrap();
 
     assert_eq!(result.path(), expected_path);
+}
+
+#[test]
+fn test_open_empty_file_fails() {
+    let result = NortonGuide::open(EMPTY_FILE_PATH);
+    assert_eq!(result.unwrap_err().kind(), ErrorKind::UnexpectedEof);
+}
+
+#[test]
+fn test_goto_method_moves_cursor() {
+    let mut guide = NortonGuide::open(EXISTS_PATH).unwrap();
+
+    let position = 10;
+    let result = guide.goto(position).unwrap();
+
+    assert_eq!(result, position);
+}
+
+#[test]
+fn test_goto_method_past_end_of_file() {
+    let mut guide = NortonGuide::open(EXISTS_PATH).unwrap();
+    assert!(guide.goto(1_000_000_000).is_ok());
+}
+
+#[test]
+fn test_magic_method_returns_correct_value() {
+    let guide = NortonGuide::open(EXISTS_PATH).unwrap();
+    assert_eq!(guide.magic(), u16::from_le_bytes(*b"NG"));
 }
 
 // test_guide.rs ends here
