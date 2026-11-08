@@ -16,6 +16,6 @@ lint:
 
 .PHONY: tidy
 tidy:
-	cargo fmt --all -- --check
+	cargo fmt --all
 
 ### Makefile ends here
