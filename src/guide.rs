@@ -2,19 +2,36 @@ use std::fs::File;
 use std::io::{self, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 
+/// The header segment of a Norton Guide database file.
 #[derive(Debug)]
 pub struct Header {
+    /// The magic number that identifies the file as a Norton Guide database.
     magic: u16,
 }
 
+/// The `NortonGuide` struct represents a Norton Guide database file.
 #[derive(Debug)]
 pub struct NortonGuide {
+    /// The header of the Norton Guide database file.
     header: Header,
+    /// The path to the Norton Guide database file.
     path: PathBuf,
+    /// The file handle for the Norton Guide database file.
     file: File,
 }
 
+/// Implementations for the `Header` struct.
 impl Header {
+    /// Creates a new `Header` instance by reading the magic number from the
+    /// provided file.
+    ///
+    /// # Arguments
+    ///
+    /// * `file` - A mutable reference to a type that implements the `Read`
+    ///   trait, from which the magic number will be read.
+    /// # Returns
+    /// * `io::Result<Self>` - Returns an `Ok(Header)` if successful, or
+    ///   an `Err(io::Error)` if reading fails.
     pub fn new(file: &mut impl Read) -> io::Result<Self> {
         let mut buffer = [0u8; 2];
         file.read_exact(&mut buffer)?;
@@ -22,17 +39,31 @@ impl Header {
         Ok(Self { magic })
     }
 
+    /// Returns the magic number of the Norton Guide database file.
+    /// # Returns
+    /// * `u16` - The magic number read from the file.
     pub fn magic(&self) -> u16 {
         self.magic
     }
 }
 
+/// Implementations for the `NortonGuide` struct.
 impl NortonGuide {
     /// The length of a title in the header.
     pub const TITLE_LENGTH: usize = 40;
     /// The length of a line in the credits, in the header.
     pub const CREDIT_LENGTH: usize = 66;
 
+    /// Opens a Norton Guide database file at the specified path and reads
+    /// its header.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - A path to the Norton Guide database file.
+    /// # Returns
+    /// * `io::Result<Self>` - Returns an `Ok(NortonGuide)` if successful,
+    ///   or an `Err(io::Error)` if opening the file or reading the header
+    ///   fails.
     pub fn open(path: impl AsRef<Path>) -> io::Result<Self> {
         let path = path.as_ref().to_path_buf();
         let mut file = File::open(&path)?;
@@ -41,6 +72,8 @@ impl NortonGuide {
     }
 
     /// Returns the path of the Norton Guide file.
+    /// # Returns
+    /// * `&Path` - A reference to the path of the Norton Guide file.
     pub fn path(&self) -> &Path {
         &self.path
     }
@@ -50,14 +83,19 @@ impl NortonGuide {
         self.file.seek(SeekFrom::Start(position))
     }
 
+    /// Returns the magic number of the Norton Guide database file.
+    /// # Returns
+    /// * `u16` - The magic number read from the file.
     pub fn magic(&self) -> u16 {
         self.header.magic()
     }
 
+    /// Returns the magic number as a string.
+    /// # Returns
+    /// * `String` - The magic number converted to a string.
     pub fn magic_string(&self) -> String {
         String::from_utf8_lossy(&self.magic().to_le_bytes()).to_string()
     }
-
 }
 
 // guide.rs ends here
