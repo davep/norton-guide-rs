@@ -56,4 +56,10 @@ fn test_magic_method_returns_correct_value() {
     assert_eq!(guide.magic(), u16::from_le_bytes(*b"NG"));
 }
 
+#[test]
+fn test_magic_string_method_returns_correct_value() {
+    let guide = NortonGuide::open(EXISTS_PATH).unwrap();
+    assert_eq!(guide.magic_string(), "NG");
+}
+
 // test_guide.rs ends here

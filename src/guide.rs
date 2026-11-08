@@ -53,6 +53,11 @@ impl NortonGuide {
     pub fn magic(&self) -> u16 {
         self.header.magic()
     }
+
+    pub fn magic_string(&self) -> String {
+        String::from_utf8_lossy(&self.magic().to_le_bytes()).to_string()
+    }
+
 }
 
 // guide.rs ends here
