@@ -15,7 +15,7 @@ pub struct NortonGuide {
 }
 
 impl Header {
-    pub fn new(file: &mut File) -> io::Result<Self> {
+    pub fn new(file: &mut impl Read) -> io::Result<Self> {
         let mut buffer = [0u8; 2];
         file.read_exact(&mut buffer)?;
         let magic = u16::from_le_bytes(buffer);
@@ -35,8 +35,8 @@ impl NortonGuide {
 
     pub fn open(path: impl AsRef<Path>) -> io::Result<Self> {
         let path = path.as_ref().to_path_buf();
-        let file = File::open(&path)?;
-        let header = Header::new(&mut file.try_clone()?)?;
+        let mut file = File::open(&path)?;
+        let header = Header::new(&mut file)?;
         Ok(Self { header, path, file })
     }
 
