@@ -24,6 +24,7 @@ impl NortonGuide {
         Ok(Self { path })
     }
 
+    /// Returns the path of the Norton Guide file.
     pub fn path(&self) -> &Path {
         &self.path
     }
