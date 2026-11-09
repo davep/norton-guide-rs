@@ -62,4 +62,10 @@ fn test_magic_string_method_returns_correct_value() {
     assert_eq!(guide.magic_string(), "NG");
 }
 
+#[test]
+fn test_menu_count() {
+    let guide = NortonGuide::open(EXISTS_PATH).unwrap();
+    assert_eq!(guide.menu_count(), 1);
+}
+
 // test_guide.rs ends here

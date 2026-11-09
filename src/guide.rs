@@ -63,6 +63,14 @@ impl NortonGuide {
         String::from_utf8_lossy(&self.magic().to_le_bytes()).to_string()
     }
 
+    /// Returns the number of topics in the Norton Guide database file.
+    ///
+    /// # Returns
+    /// * `u16` - The number of topics read from the file.
+    pub fn menu_count(&self) -> u16 {
+        self.header.menu_count()
+    }
+
     pub fn reader(&mut self) -> &mut Reader {
         &mut self.reader
     }
