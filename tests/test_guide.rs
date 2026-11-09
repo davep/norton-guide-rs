@@ -86,6 +86,14 @@ fn test_magic_string_method_returns_correct_value() {
 }
 
 #[test]
+fn test_made_with() {
+    assert_eq!(
+        NortonGuide::open(EXISTS_PATH).unwrap().made_with(),
+        "Norton Guide"
+    );
+}
+
+#[test]
 fn test_menu_count() {
     assert_eq!(NortonGuide::open(EXISTS_PATH).unwrap().menu_count(), 1);
 }
