@@ -1,3 +1,6 @@
+//! This module defines the `NortonGuide` struct, which represents a Norton
+//! Guide database file.
+
 use std::io;
 use std::path::{Path, PathBuf};
 

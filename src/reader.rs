@@ -1,3 +1,12 @@
+//! The Norton Guide reader code.
+//!
+//! This module provides functionality for reading and decrypting data from
+//! Norton Guide database files. It defines a `Reader` struct that wraps a
+//! file handle and provides methods for reading various data types,
+//! including bytes, words, longs, and strings. The data can be read in both
+//! encrypted and unencrypted forms, with decryption performed using a
+//! simple XOR operation.
+
 use std::fs::File;
 use std::io::{Read, Seek};
 use std::path::Path;
@@ -7,11 +16,19 @@ use std::path::Path;
 /// file.
 #[derive(Debug)]
 pub struct Reader {
+    /// The file handle used for reading data from the Norton Guide database
     handle: File,
 }
 
-/// Decrypts the given buffer in place using a simple XOR operation with
-/// the value `0x1A`.
+/// Decrypts the given buffer in place.
+///
+/// The decryption is performed using a simple XOR operation with the value
+/// `0x1A`. Each byte in the buffer is XORed with this value to produce the
+/// decrypted result.
+///
+/// # Arguments
+///
+/// * `buffer` - A mutable slice of bytes to be decrypted.
 fn decrypt(buffer: &mut [u8]) {
     for byte in buffer.iter_mut() {
         *byte ^= 0x1A;

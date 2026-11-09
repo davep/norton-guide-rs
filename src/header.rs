@@ -1,3 +1,9 @@
+//! Code for heading the header of a Norton Guide database file.
+//!
+//! This module defines the `Header` struct, which represents the header
+//! data of a Norton Guide database file. It provides methods to read and
+//! access the header information from a binary file.
+
 use crate::reader::Reader;
 use std::io;
 
