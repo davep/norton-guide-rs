@@ -71,10 +71,19 @@ impl NortonGuide {
         self.header.menu_count()
     }
 
+    /// Returns the title of the Norton Guide database file.
+    ///
+    /// # Returns
+    /// * `&str` - A reference to the title string read from the file.
     pub fn title(&self) -> &str {
         self.header.title()
     }
 
+    /// Returns a mutable reference to the `Reader` instance for the Norton
+    /// Guide database file.
+    ///
+    /// # Returns
+    /// * `&mut Reader` - A mutable reference to the `Reader` instance.
     pub fn reader(&mut self) -> &mut Reader {
         &mut self.reader
     }
