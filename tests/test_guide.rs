@@ -45,7 +45,10 @@ fn test_is_valid() {
 
 #[test]
 fn test_is_not_valid() {
-    assert!(!NortonGuide::open(NOT_GUIDE_FILE_PATH).unwrap().is_valid());
+    assert_eq!(
+        NortonGuide::open(NOT_GUIDE_FILE_PATH).unwrap_err().kind(),
+        ErrorKind::InvalidData
+    );
 }
 
 #[test]

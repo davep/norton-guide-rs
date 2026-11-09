@@ -4,6 +4,7 @@
 use std::io;
 use std::path::{Path, PathBuf};
 
+use crate::entry::Menu;
 use crate::header::Header;
 use crate::magic::GuideMaker;
 use crate::reader::Reader;
@@ -13,6 +14,8 @@ use crate::reader::Reader;
 pub struct NortonGuide {
     /// The header of the Norton Guide database file.
     header: Header,
+    /// The list of menus in the Norton Guide database file.
+    menus: Vec<Menu>,
     /// The path to the Norton Guide database file.
     path: PathBuf,
     /// The file reader for the Norton Guide database file.
@@ -36,8 +39,19 @@ impl NortonGuide {
         let path = path.as_ref().to_path_buf();
         let mut reader = Reader::new(&path)?;
         let header = Header::new(&mut reader)?;
+        if !GuideMaker::from_magic(header.magic()).is_valid() {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "Invalid Norton Guide file: magic number does not match.",
+            ));
+        }
+        let mut menus = Vec::with_capacity(header.menu_count() as usize);
+        for _ in 0..header.menu_count() {
+            menus.push(Menu::new(&mut reader)?);
+        }
         Ok(Self {
             header,
+            menus,
             path,
             reader,
         })
@@ -81,6 +95,10 @@ impl NortonGuide {
     /// * `u16` - The number of topics read from the file.
     pub fn menu_count(&self) -> u16 {
         self.header.menu_count()
+    }
+
+    pub fn menu(&self, index: usize) -> Option<&Menu> {
+        self.menus.get(index)
     }
 
     /// Returns the title of the Norton Guide database file.

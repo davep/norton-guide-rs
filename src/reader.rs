@@ -35,6 +35,12 @@ fn decrypt(buffer: &mut [u8]) {
     }
 }
 
+#[inline]
+fn null_string(buffer: &[u8]) -> String {
+    String::from_utf8_lossy(&buffer[..buffer.iter().position(|&b| b == 0).unwrap_or(buffer.len())])
+        .to_string()
+}
+
 /// Implementations for the `Reader` struct.
 impl Reader {
     /// Creates a new `Reader` instance by opening the specified file path.
@@ -52,6 +58,26 @@ impl Reader {
         Ok(Self {
             handle: File::open(path)?,
         })
+    }
+
+    /// Returns the current position of the file cursor in the Norton Guide.
+    ///
+    /// # Returns
+    ///
+    /// * `io::Result<u64>` - Returns an `Ok(u64)` with the current position
+    ///   if successful, or an `Err(io::Error)` if retrieving
+    pub fn position(&mut self) -> io::Result<u64> {
+        self.handle.stream_position()
+    }
+
+    /// Skips a specified number of bytes in the Norton Guide file.
+    ///
+    /// # Arguments
+    ///
+    /// * `count` - The number of bytes to skip. A positive value moves the
+    ///   cursor forward, while a negative value moves it backward.
+    pub fn skip(&mut self, count: i64) -> io::Result<u64> {
+        self.handle.seek(SeekFrom::Current(count))
     }
 
     /// Moves the file cursor to the specified position in the Norton Guide
@@ -186,10 +212,21 @@ impl Reader {
     pub fn read_string(&mut self, length: usize) -> io::Result<String> {
         let mut buffer = vec![0u8; length];
         self.handle.read_exact(&mut buffer)?;
-        Ok(String::from_utf8_lossy(
-            &buffer[..buffer.iter().position(|&b| b == 0).unwrap_or(length)],
-        )
-        .to_string())
+        Ok(null_string(&buffer))
+    }
+
+    pub fn read_encrypted_string(&mut self, length: usize) -> io::Result<String> {
+        let mut buffer = vec![0u8; length];
+        self.handle.read_exact(&mut buffer)?;
+        decrypt(&mut buffer);
+        Ok(null_string(&buffer))
+    }
+
+    pub fn read_encrypted_stringz(&mut self, length: usize) -> io::Result<String> {
+        let postion = self.position()?;
+        let result = self.read_encrypted_string(length)?;
+        self.goto(postion + result.len() as u64)?;
+        Ok(result)
     }
 }
 
