@@ -79,6 +79,14 @@ impl NortonGuide {
         self.header.title()
     }
 
+    /// Returns the credits associated with the Norton Guide database file.
+    ///
+    /// # Returns
+    /// * `&[String; 5]` - A reference to the array of credit strings read from the file.
+    pub fn credits(&self) -> &[String; 5] {
+        self.header.credits()
+    }
+
     /// Returns a mutable reference to the `Reader` instance for the Norton
     /// Guide database file.
     ///

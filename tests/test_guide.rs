@@ -74,4 +74,17 @@ fn test_guide_title() {
     assert_eq!(guide.title(), "Expert Guide");
 }
 
+#[test]
+fn test_guide_credits() {
+    let guide = NortonGuide::open(EXISTS_PATH).unwrap();
+    let expected_credits = [
+        "Expert Guide",
+        "Copyright (c) 1997-2015 David A. Pearson",
+        "",
+        "email: davep@davep.org",
+        "  web: http://www.davep.org/",
+    ];
+    assert_eq!(guide.credits(), &expected_credits);
+}
+
 // test_guide.rs ends here

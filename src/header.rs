@@ -10,10 +10,16 @@ pub struct Header {
     menu_count: u16,
     /// The title of the Norton Guide database file.
     title: String,
+    /// The credits associated with the Norton Guide database file.
+    credits: [String; 5],
 }
 
 /// The length of the title field in the header, in bytes.
 const TITLE_LENGTH: usize = 40;
+/// The length of the credit field in the header, in bytes.
+const CREDIT_LENGTH: usize = 66;
+/// The number of credit fields in the header.
+const CREDITS_COUNT: usize = 5;
 
 /// Implementations for the `Header` struct.
 impl Header {
@@ -32,10 +38,16 @@ impl Header {
         reader.read_long()?; // Skip the next 4 bytes (reserved)
         let menu_count = reader.read_word()?;
         let title = reader.read_string(TITLE_LENGTH)?;
+        let mut credits = Vec::with_capacity(CREDITS_COUNT);
+        for _ in 0..CREDITS_COUNT {
+            credits.push(reader.read_string(CREDIT_LENGTH)?);
+        }
+        let credits = credits.try_into().unwrap();
         Ok(Self {
             magic,
             menu_count,
             title,
+            credits,
         })
     }
 
@@ -58,6 +70,13 @@ impl Header {
     /// * `&str` - A reference to the title string read from the file.
     pub fn title(&self) -> &str {
         &self.title
+    }
+
+    /// Returns the credits associated with the Norton Guide database file.
+    /// # Returns
+    /// * `&[String; 5]` - A reference to the array of credit strings read from the file.
+    pub fn credits(&self) -> &[String; 5] {
+        &self.credits
     }
 }
 
