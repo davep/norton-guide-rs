@@ -12,6 +12,7 @@ pub struct Header {
     title: String,
 }
 
+/// The length of the title field in the header, in bytes.
 const TITLE_LENGTH: usize = 40;
 
 /// Implementations for the `Header` struct.
