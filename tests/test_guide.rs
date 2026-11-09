@@ -68,4 +68,10 @@ fn test_menu_count() {
     assert_eq!(guide.menu_count(), 1);
 }
 
+#[test]
+fn test_guide_title() {
+    let guide = NortonGuide::open(EXISTS_PATH).unwrap();
+    assert_eq!(guide.title(), "Expert Guide");
+}
+
 // test_guide.rs ends here

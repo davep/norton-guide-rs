@@ -151,6 +151,29 @@ impl Reader {
     pub fn read_encrypted_long(&mut self) -> std::io::Result<u32> {
         Ok(u32::from_le_bytes(self.read_encrypted_bytes::<4>()?))
     }
+
+    /// Reads a string of the specified length from the Norton Guide file.
+    ///
+    /// The string is read as a sequence of bytes and converted to a UTF-8
+    /// string. If the string contains a null terminator, it will be
+    /// truncated at the null terminator.
+    ///
+    /// # Arguments
+    ///
+    /// * `length` - The length of the string to read.
+    ///
+    /// # Returns
+    ///
+    /// * `std::io::Result<String>` - Returns an `Ok(String)` with the read
+    ///   string if successful, or an `Err(std::io::Error)` if reading fails.
+    pub fn read_string(&mut self, length: usize) -> std::io::Result<String> {
+        let mut buffer = vec![0u8; length];
+        self.handle.read_exact(&mut buffer)?;
+        Ok(String::from_utf8_lossy(
+            &buffer[..buffer.iter().position(|&b| b == 0).unwrap_or(length)],
+        )
+        .to_string())
+    }
 }
 
 // reader.rs ends here

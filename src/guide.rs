@@ -71,6 +71,10 @@ impl NortonGuide {
         self.header.menu_count()
     }
 
+    pub fn title(&self) -> &str {
+        self.header.title()
+    }
+
     pub fn reader(&mut self) -> &mut Reader {
         &mut self.reader
     }

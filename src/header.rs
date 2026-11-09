@@ -8,7 +8,11 @@ pub struct Header {
     magic: u16,
     /// The number of topics in the Norton Guide database file.
     menu_count: u16,
+    /// The title of the Norton Guide database file.
+    title: String,
 }
+
+const TITLE_LENGTH: usize = 40;
 
 /// Implementations for the `Header` struct.
 impl Header {
@@ -26,7 +30,12 @@ impl Header {
         let magic = reader.read_word()?;
         reader.read_long()?; // Skip the next 4 bytes (reserved)
         let menu_count = reader.read_word()?;
-        Ok(Self { magic, menu_count })
+        let title = reader.read_string(TITLE_LENGTH)?;
+        Ok(Self {
+            magic,
+            menu_count,
+            title,
+        })
     }
 
     /// Returns the magic number of the Norton Guide database file.
@@ -41,6 +50,10 @@ impl Header {
     /// * `u16` - The number of topics read from the file.
     pub fn menu_count(&self) -> u16 {
         self.menu_count
+    }
+
+    pub fn title(&self) -> &str {
+        &self.title
     }
 }
 
