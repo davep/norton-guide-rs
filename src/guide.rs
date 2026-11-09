@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{self, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 
-/// The header segment of a Norton Guide database file.
+/// The header data of a Norton Guide database file.
 #[derive(Debug)]
 pub struct Header {
     /// The magic number that identifies the file as a Norton Guide database.
@@ -22,13 +22,13 @@ pub struct NortonGuide {
 
 /// Implementations for the `Header` struct.
 impl Header {
-    /// Creates a new `Header` instance by reading the magic number from the
-    /// provided file.
+    /// Creates a new guide `Header` instance.
     ///
     /// # Arguments
     ///
     /// * `file` - A mutable reference to a type that implements the `Read`
-    ///   trait, from which the magic number will be read.
+    ///   trait.
+    ///
     /// # Returns
     /// * `io::Result<Self>` - Returns an `Ok(Header)` if successful, or
     ///   an `Err(io::Error)` if reading fails.
@@ -60,6 +60,7 @@ impl NortonGuide {
     /// # Arguments
     ///
     /// * `path` - A path to the Norton Guide database file.
+    ///
     /// # Returns
     /// * `io::Result<Self>` - Returns an `Ok(NortonGuide)` if successful,
     ///   or an `Err(io::Error)` if opening the file or reading the header
@@ -72,18 +73,29 @@ impl NortonGuide {
     }
 
     /// Returns the path of the Norton Guide file.
+    ///
     /// # Returns
     /// * `&Path` - A reference to the path of the Norton Guide file.
     pub fn path(&self) -> &Path {
         &self.path
     }
 
-    /// Moves the file cursor to the specified position in the Norton Guide file.
+    /// Moves the file cursor to the specified position in the Norton Guide
+    /// file.
+    ///
+    /// # Arguments
+    ///
+    /// * `position` - The position to move the file cursor to.
+    ///
+    /// # Returns
+    /// * `io::Result<u64>` - Returns an `Ok(u64)` with the new position if
+    /// successful, or an `Err(io::Error)` if seeking fails.
     pub fn goto(&mut self, position: u64) -> io::Result<u64> {
         self.file.seek(SeekFrom::Start(position))
     }
 
     /// Returns the magic number of the Norton Guide database file.
+    ///
     /// # Returns
     /// * `u16` - The magic number read from the file.
     pub fn magic(&self) -> u16 {
@@ -91,6 +103,7 @@ impl NortonGuide {
     }
 
     /// Returns the magic number as a string.
+    ///
     /// # Returns
     /// * `String` - The magic number converted to a string.
     pub fn magic_string(&self) -> String {
