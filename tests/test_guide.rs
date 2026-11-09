@@ -1,4 +1,5 @@
 use norton_guide::NortonGuide;
+use norton_guide::magic::GuideMaker;
 use std::io::ErrorKind;
 use std::path::Path;
 
@@ -53,7 +54,7 @@ fn test_goto_method_past_end_of_file() {
 #[test]
 fn test_magic_method_returns_correct_value() {
     let guide = NortonGuide::open(EXISTS_PATH).unwrap();
-    assert_eq!(guide.magic(), u16::from_le_bytes(*b"NG"));
+    assert_eq!(guide.magic(), GuideMaker::NortonGuide);
 }
 
 #[test]

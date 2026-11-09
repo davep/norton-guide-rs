@@ -2,6 +2,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::header::Header;
+use crate::magic::GuideMaker;
 use crate::reader::Reader;
 
 /// The `NortonGuide` struct represents a Norton Guide database file.
@@ -47,12 +48,12 @@ impl NortonGuide {
         &self.path
     }
 
-    /// Returns the magic number of the Norton Guide database file.
-    ///
-    /// # Returns
-    /// * `u16` - The magic number read from the file.
-    pub fn magic(&self) -> u16 {
-        self.header.magic()
+    pub fn magic(&self) -> GuideMaker {
+        GuideMaker::from_magic(self.header.magic())
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.magic().is_valid()
     }
 
     /// Returns the magic number as a string.
@@ -60,7 +61,15 @@ impl NortonGuide {
     /// # Returns
     /// * `String` - The magic number converted to a string.
     pub fn magic_string(&self) -> String {
-        String::from_utf8_lossy(&self.magic().to_le_bytes()).to_string()
+        self.magic().to_magic_string()
+    }
+
+    /// Returns the name of the software that created the Norton Guide file.
+    ///
+    /// # Returns
+    /// * `&'static str` - The name of the software that created the Norton Guide file.
+    pub fn made_with(&self) -> &'static str {
+        self.magic().made_with()
     }
 
     /// Returns the number of topics in the Norton Guide database file.
