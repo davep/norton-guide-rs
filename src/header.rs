@@ -21,8 +21,9 @@ impl Header {
     /// * `io::Result<Self>` - Returns an `Ok(Header)` if successful, or
     ///   an `Err(io::Error)` if reading fails.
     pub fn new(reader: &mut Reader) -> io::Result<Self> {
-        let magic = reader.read_word()?;
-        Ok(Self { magic })
+        Ok(Self {
+            magic: reader.read_word()?,
+        })
     }
 
     /// Returns the magic number of the Norton Guide database file.

@@ -20,7 +20,6 @@ fn decrypt(buffer: &mut [u8]) {
 
 /// Implementations for the `Reader` struct.
 impl Reader {
-
     /// Creates a new `Reader` instance by opening the specified file path.
     ///
     /// # Arguments
@@ -33,8 +32,9 @@ impl Reader {
     ///   if successful, or an `Err(std::io::Error)` if opening the file
     ///   fails.
     pub fn new(path: &Path) -> std::io::Result<Self> {
-        let handle = File::open(path)?;
-        Ok(Self { handle })
+        Ok(Self {
+            handle: File::open(path)?,
+        })
     }
 
     /// Moves the file cursor to the specified position in the Norton Guide
