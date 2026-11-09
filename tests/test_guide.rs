@@ -39,7 +39,7 @@ fn test_goto_method_moves_cursor() {
     let mut guide = NortonGuide::open(EXISTS_PATH).unwrap();
 
     let position = 10;
-    let result = guide.goto(position).unwrap();
+    let result = guide.reader().goto(position).unwrap();
 
     assert_eq!(result, position);
 }
@@ -47,7 +47,7 @@ fn test_goto_method_moves_cursor() {
 #[test]
 fn test_goto_method_past_end_of_file() {
     let mut guide = NortonGuide::open(EXISTS_PATH).unwrap();
-    assert!(guide.goto(1_000_000_000).is_ok());
+    assert!(guide.reader().goto(1_000_000_000).is_ok());
 }
 
 #[test]
