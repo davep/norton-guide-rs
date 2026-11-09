@@ -1,4 +1,4 @@
-use norton_guide::entry_type::EntryType;
+use norton_guide::entry::types::EntryType;
 
 #[test]
 fn test_entry_type_try_from() {

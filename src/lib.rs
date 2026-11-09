@@ -1,4 +1,4 @@
-pub mod entry_type;
+pub mod entry;
 pub mod guide;
 pub mod header;
 pub mod magic;

@@ -32,4 +32,4 @@ impl TryFrom<u16> for EntryType {
     }
 }
 
-// entry_type.rs ends here
+// types.rs ends here
