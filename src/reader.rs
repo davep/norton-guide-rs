@@ -8,7 +8,7 @@
 //! simple XOR operation.
 
 use std::fs::File;
-use std::io::{Read, Seek};
+use std::io::{self, Read, Seek, SeekFrom};
 use std::path::Path;
 
 /// The `Reader` struct is a wrapper around a file handle that provides
@@ -48,7 +48,7 @@ impl Reader {
     /// * `std::io::Result<Self>` - Returns an `Ok(Reader)`
     ///   if successful, or an `Err(std::io::Error)` if opening the file
     ///   fails.
-    pub fn new(path: &Path) -> std::io::Result<Self> {
+    pub fn new(path: &Path) -> io::Result<Self> {
         Ok(Self {
             handle: File::open(path)?,
         })
@@ -65,8 +65,8 @@ impl Reader {
     ///
     /// * `io::Result<u64>` - Returns an `Ok(u64)` with the new position if
     ///   successful, or an `Err(io::Error)` if seeking fails.
-    pub fn goto(&mut self, position: u64) -> std::io::Result<u64> {
-        self.handle.seek(std::io::SeekFrom::Start(position))
+    pub fn goto(&mut self, position: u64) -> io::Result<u64> {
+        self.handle.seek(SeekFrom::Start(position))
     }
 
     /// Reads a specified number of bytes from the Norton Guide file into a
@@ -80,7 +80,7 @@ impl Reader {
     ///
     /// * `std::io::Result<[u8; N]>` - Returns an `Ok([u8; N])` with the
     ///   read bytes if successful, or an `Err(std::io::Error)` if reading fails.
-    fn read_bytes<const N: usize>(&mut self) -> std::io::Result<[u8; N]> {
+    fn read_bytes<const N: usize>(&mut self) -> io::Result<[u8; N]> {
         let mut buffer = [0u8; N];
         self.handle.read_exact(&mut buffer)?;
         Ok(buffer)
@@ -99,7 +99,7 @@ impl Reader {
     /// * `std::io::Result<[u8; N]>` - Returns an `Ok([u8; N])` with the
     ///   decrypted bytes if successful, or an `Err (std::io::Error)` if
     ///   reading fails.
-    fn read_encrypted_bytes<const N: usize>(&mut self) -> std::io::Result<[u8; N]> {
+    fn read_encrypted_bytes<const N: usize>(&mut self) -> io::Result<[u8; N]> {
         let mut buffer = self.read_bytes::<N>()?;
         decrypt(&mut buffer);
         Ok(buffer)
@@ -111,7 +111,7 @@ impl Reader {
     ///
     /// * `std::io::Result<u8>` - Returns an `Ok(u8)` with the read byte if
     ///   successful, or an `Err(std::io::Error)` if reading fails.
-    pub fn read_byte(&mut self) -> std::io::Result<u8> {
+    pub fn read_byte(&mut self) -> io::Result<u8> {
         Ok(self.read_bytes::<1>()?[0])
     }
 
@@ -122,7 +122,7 @@ impl Reader {
     ///
     /// * `std::io::Result<u8>` - Returns an `Ok(u8)` with the decrypted
     ///   byte if successful, or an `Err(std::io::Error)` if reading fails.
-    pub fn read_encrypted_byte(&mut self) -> std::io::Result<u8> {
+    pub fn read_encrypted_byte(&mut self) -> io::Result<u8> {
         Ok(self.read_encrypted_bytes::<1>()?[0])
     }
 
@@ -132,7 +132,7 @@ impl Reader {
     ///
     /// * `std::io::Result<u16>` - Returns an `Ok(u16)` with the read word
     ///   if successful, or an `Err(std::io::Error)` if reading fails.
-    pub fn read_word(&mut self) -> std::io::Result<u16> {
+    pub fn read_word(&mut self) -> io::Result<u16> {
         Ok(u16::from_le_bytes(self.read_bytes::<2>()?))
     }
 
@@ -144,7 +144,7 @@ impl Reader {
     /// * `std::io::Result<u16>` - Returns an `Ok(u16)` with the decrypted
     ///   word if successful, or an `Err(std::io::Error)` if reading
     ///   fails.
-    pub fn read_encrypted_word(&mut self) -> std::io::Result<u16> {
+    pub fn read_encrypted_word(&mut self) -> io::Result<u16> {
         Ok(u16::from_le_bytes(self.read_encrypted_bytes::<2>()?))
     }
 
@@ -154,7 +154,7 @@ impl Reader {
     ///
     /// * `std::io::Result<u32>` - Returns an `Ok(u32)` with the read long
     ///   if successful, or an `Err(std::io::Error)` if reading fails.
-    pub fn read_long(&mut self) -> std::io::Result<u32> {
+    pub fn read_long(&mut self) -> io::Result<u32> {
         Ok(u32::from_le_bytes(self.read_bytes::<4>()?))
     }
 
@@ -165,7 +165,7 @@ impl Reader {
     ///
     /// * `std::io::Result<u32>` - Returns an `Ok(u32)` with the decrypted
     ///   long if successful, or an `Err(std::io::Error)` if reading fails.
-    pub fn read_encrypted_long(&mut self) -> std::io::Result<u32> {
+    pub fn read_encrypted_long(&mut self) -> io::Result<u32> {
         Ok(u32::from_le_bytes(self.read_encrypted_bytes::<4>()?))
     }
 
@@ -183,7 +183,7 @@ impl Reader {
     ///
     /// * `std::io::Result<String>` - Returns an `Ok(String)` with the read
     ///   string if successful, or an `Err(std::io::Error)` if reading fails.
-    pub fn read_string(&mut self, length: usize) -> std::io::Result<String> {
+    pub fn read_string(&mut self, length: usize) -> io::Result<String> {
         let mut buffer = vec![0u8; length];
         self.handle.read_exact(&mut buffer)?;
         Ok(String::from_utf8_lossy(
