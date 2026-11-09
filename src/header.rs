@@ -3,7 +3,7 @@ use std::io;
 
 /// The header data of a Norton Guide database file.
 #[derive(Debug)]
-pub struct Header {
+pub(crate) struct Header {
     /// The magic number that identifies the file as a Norton Guide database.
     magic: u16,
     /// The number of topics in the Norton Guide database file.
