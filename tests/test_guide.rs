@@ -6,6 +6,7 @@ use std::path::Path;
 const EXISTS_PATH: &str = "tests/guides/eg.ng";
 const DOES_NOT_EXIST_PATH: &str = "tests/guides/does_not_exist.ng";
 const EMPTY_FILE_PATH: &str = "tests/guides/empty.ng";
+const NOT_GUIDE_FILE_PATH: &str = "tests/guides/not.ng";
 
 #[test]
 fn test_open_non_existent_file_fails() {
@@ -33,6 +34,16 @@ fn test_path_method_returns_correct_path() {
 fn test_open_empty_file_fails() {
     let result = NortonGuide::open(EMPTY_FILE_PATH);
     assert_eq!(result.unwrap_err().kind(), ErrorKind::UnexpectedEof);
+}
+
+#[test]
+fn test_is_valid() {
+    assert!(NortonGuide::open(EXISTS_PATH).unwrap().is_valid());
+}
+
+#[test]
+fn test_is_not_valid() {
+    assert!(!NortonGuide::open(NOT_GUIDE_FILE_PATH).unwrap().is_valid());
 }
 
 #[test]
