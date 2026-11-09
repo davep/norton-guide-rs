@@ -21,4 +21,8 @@ tidy:
 .PHONY: checkall
 checkall: lint tidy test
 
+.PHONY: coverage
+coverage:
+	cargo tarpaulin --verbose
+
 ### Makefile ends here
