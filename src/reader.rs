@@ -215,6 +215,21 @@ impl Reader {
         Ok(null_string(&buffer))
     }
 
+    /// Reads an encrypted string of the specified length.
+    ///
+    /// The file cursor is moved forward by the specified length, and the
+    /// read bytes are decrypted in place. The resulting string is returned,
+    /// truncated at the first null terminator if present.
+    ///
+    /// # Arguments
+    ///
+    /// * `length` - The length of the encrypted string to read.
+    ///
+    /// # Returns
+    ///
+    /// * `std::io::Result<String>` - Returns an `Ok(String)` with the
+    ///   decrypted string if successful, or an `Err(std::io::Error)` if
+    ///   reading fails.
     pub fn read_encrypted_string(&mut self, length: usize) -> io::Result<String> {
         let mut buffer = vec![0u8; length];
         self.handle.read_exact(&mut buffer)?;
@@ -222,6 +237,22 @@ impl Reader {
         Ok(null_string(&buffer))
     }
 
+    /// Reads an encrypted null-terminated string up to the given length.
+    ///
+    /// The file cursor is moved forward only as far as first null
+    /// terminator or the specified length, whichever comes first. The read
+    /// bytes are decrypted in place, and the resulting string is returned,
+    /// truncated at the first null terminator if present.
+    ///
+    /// # Arguments
+    ///
+    /// * `length` - The maximum length of the encrypted string to read.
+    ///
+    /// # Returns
+    ///
+    /// * `std::io::Result<String>` - Returns an `Ok(String)` with the
+    ///   decrypted string if successful, or an `Err(std::io::Error)` if
+    ///   reading fails.
     pub fn read_encrypted_stringz(&mut self, length: usize) -> io::Result<String> {
         let postion = self.position()?;
         let result = self.read_encrypted_string(length)?;
