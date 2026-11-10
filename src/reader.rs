@@ -35,6 +35,15 @@ fn decrypt(buffer: &mut [u8]) {
     }
 }
 
+/// Converts a byte buffer to a string, stopping at the first null.
+///
+/// # Arguments
+///
+/// * `buffer` - A slice of bytes to be converted to a string.
+///
+/// # Returns
+/// * `String` - The resulting string, truncated at the first null byte if
+///   present.
 #[inline]
 fn null_string(buffer: &[u8]) -> String {
     String::from_utf8_lossy(&buffer[..buffer.iter().position(|&b| b == 0).unwrap_or(buffer.len())])
