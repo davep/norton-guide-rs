@@ -11,6 +11,8 @@ use std::fs::File;
 use std::io::{self, Read, Seek, SeekFrom};
 use std::path::Path;
 
+use crate::rle::RleFn;
+
 /// The `Reader` struct is a wrapper around a file handle that provides
 /// methods for reading and decrypting data from a Norton Guide database
 /// file.
@@ -239,10 +241,11 @@ impl Reader {
     /// * `std::io::Result<String>` - Returns an `Ok(String)` with the
     ///   decrypted string if successful, or an `Err(std::io::Error)` if
     ///   reading fails.
-    pub fn read_encrypted_string(&mut self, length: usize) -> io::Result<String> {
+    pub fn read_encrypted_string(&mut self, length: usize, rle: RleFn) -> io::Result<String> {
         let mut buffer = vec![0u8; length];
         self.handle.read_exact(&mut buffer)?;
         decrypt(&mut buffer);
+        let buffer = rle(&buffer);
         Ok(null_string(&buffer))
     }
 
@@ -262,9 +265,9 @@ impl Reader {
     /// * `std::io::Result<String>` - Returns an `Ok(String)` with the
     ///   decrypted string if successful, or an `Err(std::io::Error)` if
     ///   reading fails.
-    pub fn read_encrypted_stringz(&mut self, length: usize) -> io::Result<String> {
+    pub fn read_encrypted_stringz(&mut self, length: usize, rle: RleFn) -> io::Result<String> {
         let postion = self.position()?;
-        let result = self.read_encrypted_string(length)?;
+        let result = self.read_encrypted_string(length, rle)?;
         self.goto(postion + result.len() as u64)?;
         Ok(result)
     }
