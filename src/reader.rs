@@ -235,6 +235,7 @@ impl Reader {
     /// # Arguments
     ///
     /// * `length` - The length of the encrypted string to read.
+    /// * `rle` - The function for handling RLE of spaces.
     ///
     /// # Returns
     ///
@@ -259,6 +260,7 @@ impl Reader {
     /// # Arguments
     ///
     /// * `length` - The maximum length of the encrypted string to read.
+    /// * `rle` - The function for handling RLE of spaces.
     ///
     /// # Returns
     ///
