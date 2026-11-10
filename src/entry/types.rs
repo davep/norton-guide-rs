@@ -32,4 +32,23 @@ impl TryFrom<u16> for EntryType {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::rstest;
+
+    #[test]
+    fn test_unknown() {
+        assert!(EntryType::try_from(3).is_err());
+    }
+
+    #[rstest]
+    #[case::short(0, EntryType::Short)]
+    #[case::long(1, EntryType::Long)]
+    #[case::menu(2, EntryType::Menu)]
+    fn test_entry_types(#[case] value: u16, #[case] expected: EntryType) {
+        assert_eq!(EntryType::try_from(value).unwrap(), expected);
+    }
+}
+
 // types.rs ends here
