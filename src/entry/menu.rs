@@ -1,6 +1,7 @@
 //! Provides code for working with menu entries in a Norton Guide database.
 
 use crate::reader::Reader;
+use crate::rle::clean_rle;
 
 /// The `Menu` struct represents a menu entry in a Norton Guide database
 /// file. It contains information about the number of prompts, their
@@ -47,7 +48,7 @@ impl Menu {
         let mut prompts = Vec::with_capacity(count as usize);
         for _ in 0..count {
             let prompt_length = guide.read_encrypted_word()? as usize;
-            prompts.push(guide.read_encrypted_stringz(prompt_length)?);
+            prompts.push(guide.read_encrypted_stringz(prompt_length, clean_rle)?);
         }
         guide.skip(1)?; // Skip the final reserved byte.
         Ok(Self {
