@@ -41,19 +41,19 @@ impl Header {
     ///   an `Err(io::Error)` if reading fails.
     pub fn new(reader: &mut Reader) -> io::Result<Self> {
         let magic = reader.read_word()?;
-        reader.read_long()?; // Skip the next 4 bytes (reserved)
+        // Skip unknown 4 bytes.
+        reader.skip(4)?;
         let menu_count = reader.read_word()?;
         let title = reader.read_string(TITLE_LENGTH)?;
         let mut credits = Vec::with_capacity(CREDITS_COUNT);
         for _ in 0..CREDITS_COUNT {
             credits.push(reader.read_string(CREDIT_LENGTH)?);
         }
-        let credits = credits.try_into().unwrap();
         Ok(Self {
             magic,
             menu_count,
             title,
-            credits,
+            credits: credits.try_into().unwrap(),
         })
     }
 
