@@ -20,7 +20,7 @@ impl Menu {
     /// # Arguments
     ///
     /// * `guide` - A mutable reference to a `Reader` that reads from the
-    ///    Norton Guide database file.
+    ///   Norton Guide database file.
     ///
     /// # Returns
     ///
