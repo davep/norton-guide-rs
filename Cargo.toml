@@ -6,3 +6,6 @@ authors = ["Dave Pearson"]
 description = "Norton Guide database reading library"
 
 [dependencies]
+
+[dev-dependencies]
+rstest = "0.28.0"
