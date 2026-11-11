@@ -21,7 +21,7 @@ pub struct Menu {
 }
 
 /// The maximum length of a prompt in menus, in bytes.
-const MAX_PROMPT_LENGTH: usize = 128;
+pub const MAX_PROMPT_LENGTH: usize = 128;
 
 /// Implementations for the `Menu` struct.
 impl Menu {

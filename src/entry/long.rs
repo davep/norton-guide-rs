@@ -2,6 +2,7 @@
 
 use crate::NortonGuideError;
 use crate::entry::common::{Common, MAX_LINE_LENGTH};
+use crate::entry::seealso::SeeAlso;
 use crate::entry::types::EntryType;
 use crate::reader::Reader;
 use crate::rle::expand_rle;
@@ -13,7 +14,8 @@ pub struct Long {
     pub common: Common,
     /// The lines of text in the long entry.
     pub lines: Vec<String>,
-    // TODO: See also
+    /// The optional "see also" entries associated with the long entry.
+    pub see_also: Option<SeeAlso>,
 }
 
 /// Implementations for the `Long` struct.
@@ -41,7 +43,16 @@ impl Long {
         for _ in 0..common.line_count {
             lines.push(reader.read_encrypted_stringz(MAX_LINE_LENGTH, expand_rle)?);
         }
-        Ok(Self { common, lines })
+        let see_also = if common.has_see_also {
+            Some(SeeAlso::new(reader)?)
+        } else {
+            None
+        };
+        Ok(Self {
+            common,
+            lines,
+            see_also,
+        })
     }
 }
 

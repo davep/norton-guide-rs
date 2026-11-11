@@ -3,6 +3,7 @@ pub mod long;
 pub mod menu;
 pub mod optionals;
 pub mod parent;
+pub mod seealso;
 pub mod short;
 pub mod types;
 
