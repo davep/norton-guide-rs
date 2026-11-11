@@ -119,6 +119,31 @@ fn test_menu_title(valid_guide: PathBuf) {
 }
 
 #[rstest]
+fn test_menu_content_count(valid_guide: PathBuf) {
+    assert_eq!(
+        NortonGuide::open(valid_guide)
+            .unwrap()
+            .menu(0)
+            .unwrap()
+            .prompt_count(),
+        1
+    );
+}
+
+#[rstest]
+fn test_menu_prompt(valid_guide: PathBuf) {
+    assert_eq!(
+        NortonGuide::open(valid_guide)
+            .unwrap()
+            .menu(0)
+            .unwrap()
+            .prompt(0)
+            .unwrap(),
+        "Welcome To EG"
+    );
+}
+
+#[rstest]
 fn test_guide_credits(valid_guide: PathBuf) {
     let expected_credits = [
         "Expert Guide",
