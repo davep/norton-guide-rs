@@ -246,8 +246,7 @@ impl Reader {
         let mut buffer = vec![0u8; length];
         self.handle.read_exact(&mut buffer)?;
         decrypt(&mut buffer);
-        let buffer = rle(&buffer);
-        Ok(null_string(&buffer))
+        Ok(null_string(&rle(&buffer)))
     }
 
     /// Reads an encrypted null-terminated string up to the given length.
@@ -268,10 +267,17 @@ impl Reader {
     ///   decrypted string if successful, or an `Err(std::io::Error)` if
     ///   reading fails.
     pub fn read_encrypted_stringz(&mut self, length: usize, rle: RleFn) -> io::Result<String> {
-        let postion = self.position()?;
-        let result = self.read_encrypted_string(length, rle)?;
-        self.goto(postion + result.len() as u64 + 1)?;
-        Ok(result)
+        let mut buffer = Vec::with_capacity(length);
+        self.handle.by_ref().take(length as u64).read_to_end(&mut buffer)?;
+        decrypt(&mut buffer);
+        if let Some(nul_index) = buffer.iter().position(|&byte| byte == 0) {
+            let over_read = buffer.len() - (nul_index + 1);
+            if over_read > 0 {
+                self.handle.seek(SeekFrom::Current(-(over_read as i64)))?;
+            }
+            buffer.truncate(nul_index);
+        }
+        Ok(null_string(&rle(&buffer)))
     }
 }
 
