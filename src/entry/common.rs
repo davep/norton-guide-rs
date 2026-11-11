@@ -13,7 +13,7 @@ pub struct Common {
     pub size: u16,
     pub line_count: u16,
     pub has_see_also: bool,
-    pub parent: Option<EntryParent>,
+    pub parent: EntryParent,
     pub previous: u32,
     pub next: u32,
 }
