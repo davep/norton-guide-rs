@@ -1,61 +1,58 @@
+mod fixtures;
+
+use fixtures::*;
+
 use norton_guide::NortonGuide;
 use norton_guide::magic::GuideMaker;
 use std::io::ErrorKind;
-use std::path::Path;
+use std::path::PathBuf;
 
-const EXISTS_PATH: &str = "tests/guides/eg.ng";
-const DOES_NOT_EXIST_PATH: &str = "tests/guides/does_not_exist.ng";
-const EMPTY_FILE_PATH: &str = "tests/guides/empty.ng";
-const NOT_GUIDE_FILE_PATH: &str = "tests/guides/not.ng";
+use rstest::*;
 
-#[test]
-fn test_open_non_existent_file_fails() {
+#[rstest]
+fn test_open_non_existent_file_fails(missing_guide: PathBuf) {
     assert_eq!(
-        NortonGuide::open(DOES_NOT_EXIST_PATH).unwrap_err().kind(),
+        NortonGuide::open(missing_guide).unwrap_err().kind(),
         ErrorKind::NotFound
     );
 }
 
-#[test]
-fn test_open_existing_file_succeeds() {
-    assert!(NortonGuide::open(EXISTS_PATH).is_ok());
+#[rstest]
+fn test_open_existing_file_succeeds(valid_guide: PathBuf) {
+    assert!(NortonGuide::open(valid_guide).is_ok());
 }
 
-#[test]
-fn test_path_method_returns_correct_path() {
-    let expected_path: &Path = Path::new(EXISTS_PATH);
-    assert_eq!(
-        NortonGuide::open(expected_path).unwrap().path(),
-        expected_path
-    );
+#[rstest]
+fn test_path_method_returns_correct_path(valid_guide: PathBuf) {
+    assert_eq!(NortonGuide::open(&valid_guide).unwrap().path(), valid_guide,);
 }
 
-#[test]
-fn test_open_empty_file_fails() {
+#[rstest]
+fn test_open_empty_file_fails(empty_guide: PathBuf) {
     assert_eq!(
-        NortonGuide::open(EMPTY_FILE_PATH).unwrap_err().kind(),
+        NortonGuide::open(empty_guide).unwrap_err().kind(),
         ErrorKind::UnexpectedEof
     );
 }
 
-#[test]
-fn test_is_valid() {
-    assert!(NortonGuide::open(EXISTS_PATH).unwrap().is_valid());
+#[rstest]
+fn test_is_valid(valid_guide: PathBuf) {
+    assert!(NortonGuide::open(valid_guide).unwrap().is_valid());
 }
 
-#[test]
-fn test_is_not_valid() {
+#[rstest]
+fn test_is_not_valid(not_a_guide: PathBuf) {
     assert_eq!(
-        NortonGuide::open(NOT_GUIDE_FILE_PATH).unwrap_err().kind(),
+        NortonGuide::open(not_a_guide).unwrap_err().kind(),
         ErrorKind::InvalidData
     );
 }
 
-#[test]
-fn test_goto_method_moves_cursor() {
+#[rstest]
+fn test_goto_method_moves_cursor(valid_guide: PathBuf) {
     const POSITION: u64 = 10;
     assert_eq!(
-        NortonGuide::open(EXISTS_PATH)
+        NortonGuide::open(valid_guide)
             .unwrap()
             .reader()
             .goto(POSITION)
@@ -64,10 +61,10 @@ fn test_goto_method_moves_cursor() {
     );
 }
 
-#[test]
-fn test_goto_method_past_end_of_file() {
+#[rstest]
+fn test_goto_method_past_end_of_file(valid_guide: PathBuf) {
     assert!(
-        NortonGuide::open(EXISTS_PATH)
+        NortonGuide::open(valid_guide)
             .unwrap()
             .reader()
             .goto(1_000_000_000)
@@ -75,42 +72,54 @@ fn test_goto_method_past_end_of_file() {
     );
 }
 
-#[test]
-fn test_magic_method_returns_correct_value() {
+#[rstest]
+fn test_magic_method_returns_correct_value(valid_guide: PathBuf) {
     assert_eq!(
-        NortonGuide::open(EXISTS_PATH).unwrap().magic(),
+        NortonGuide::open(valid_guide).unwrap().magic(),
         GuideMaker::NortonGuide
     );
 }
 
-#[test]
-fn test_magic_string_method_returns_correct_value() {
-    assert_eq!(NortonGuide::open(EXISTS_PATH).unwrap().magic_string(), "NG");
+#[rstest]
+fn test_magic_string_method_returns_correct_value(valid_guide: PathBuf) {
+    assert_eq!(NortonGuide::open(valid_guide).unwrap().magic_string(), "NG");
 }
 
-#[test]
-fn test_made_with() {
+#[rstest]
+fn test_made_with(valid_guide: PathBuf) {
     assert_eq!(
-        NortonGuide::open(EXISTS_PATH).unwrap().made_with(),
+        NortonGuide::open(valid_guide).unwrap().made_with(),
         "Norton Guide"
     );
 }
 
-#[test]
-fn test_menu_count() {
-    assert_eq!(NortonGuide::open(EXISTS_PATH).unwrap().menu_count(), 1);
-}
-
-#[test]
-fn test_guide_title() {
+#[rstest]
+fn test_guide_title(valid_guide: PathBuf) {
     assert_eq!(
-        NortonGuide::open(EXISTS_PATH).unwrap().title(),
+        NortonGuide::open(valid_guide).unwrap().title(),
         "Expert Guide"
     );
 }
 
-#[test]
-fn test_guide_credits() {
+#[rstest]
+fn test_menu_count(valid_guide: PathBuf) {
+    assert_eq!(NortonGuide::open(valid_guide).unwrap().menu_count(), 1);
+}
+
+#[rstest]
+fn test_menu_title(valid_guide: PathBuf) {
+    assert_eq!(
+        NortonGuide::open(valid_guide)
+            .unwrap()
+            .menu(0)
+            .unwrap()
+            .title(),
+        "Expert Guide"
+    );
+}
+
+#[rstest]
+fn test_guide_credits(valid_guide: PathBuf) {
     let expected_credits = [
         "Expert Guide",
         "Copyright (c) 1997-2015 David A. Pearson",
@@ -119,7 +128,7 @@ fn test_guide_credits() {
         "  web: http://www.davep.org/",
     ];
     assert_eq!(
-        NortonGuide::open(EXISTS_PATH).unwrap().credits(),
+        NortonGuide::open(valid_guide).unwrap().credits(),
         &expected_credits
     );
 }
