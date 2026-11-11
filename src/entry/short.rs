@@ -1,8 +1,8 @@
 //! Provides code for working with a Norton Guide's short entries.
 
 use crate::NortonGuideError;
-use crate::entry::common::{Common, MAX_LINE_LENGTH};
-use crate::entry::types::EntryType;
+use crate::entry::common::MAX_LINE_LENGTH;
+use crate::entry::{Common, EntryType};
 use crate::reader::Reader;
 use crate::rle::expand_rle;
 

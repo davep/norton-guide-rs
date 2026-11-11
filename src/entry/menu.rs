@@ -1,7 +1,7 @@
 //! Provides code for working with menu entries in a Norton Guide database.
 
 use crate::NortonGuideError;
-use crate::entry::types::EntryType;
+use crate::entry::EntryType;
 use crate::reader::Reader;
 use crate::rle::clean_rle;
 

@@ -10,7 +10,9 @@ pub mod types;
 pub use common::Common;
 pub use long::Long;
 pub use menu::Menu;
+pub use seealso::SeeAlso;
 pub use short::Short;
+pub use types::EntryType;
 
 use crate::NortonGuideError;
 
