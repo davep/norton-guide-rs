@@ -10,9 +10,13 @@ use crate::rle::clean_rle;
 /// offsets, the title of the menu, and the prompts themselves.
 #[derive(Debug, Clone)]
 pub struct Menu {
+    /// The number of prompts in the menu.
     count: u16,
+    /// The offsets of the prompts in the menu.
     offsets: Vec<u32>,
+    /// The title of the menu.
     title: String,
+    /// The prompts in the menu.
     prompts: Vec<String>,
 }
 
