@@ -16,6 +16,12 @@ pub enum NortonGuideError {
     #[error("unexpected entry type: expected {expected}, found {found}")]
     BadEntryTypeError { expected: u16, found: u16 },
 
+    #[error("entry is not a short entry")]
+    NotShortError,
+
+    #[error("entry is not a long entry")]
+    NotLongError,
+
     /// Error variant for IO errors.
     #[error("I/O error: {0}")]
     Io(#[from] std::io::Error),
