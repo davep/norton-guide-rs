@@ -8,7 +8,7 @@ mod fixtures;
 use fixtures::*;
 
 use norton_guide::NortonGuide;
-use norton_guide::entry::{Entry, Short, Long};
+use norton_guide::entry::{Entry, Long, Short};
 
 #[rstest]
 fn test_first_entry_is_short(mut os_lib: NortonGuide) {
@@ -45,10 +45,7 @@ fn test_second_entry_is_long(mut os_lib: NortonGuide) {
 fn test_second_entry_has_correct_line_count(mut os_lib: NortonGuide) {
     let _ = os_lib.load();
     assert_eq!(
-        Long::try_from(os_lib.load().unwrap())
-            .unwrap()
-            .lines
-            .len(),
+        Long::try_from(os_lib.load().unwrap()).unwrap().lines.len(),
         38
     );
 }

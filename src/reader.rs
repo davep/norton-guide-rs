@@ -268,7 +268,10 @@ impl Reader {
     ///   reading fails.
     pub fn read_encrypted_stringz(&mut self, length: usize, rle: RleFn) -> io::Result<String> {
         let mut buffer = Vec::with_capacity(length);
-        self.handle.by_ref().take(length as u64).read_to_end(&mut buffer)?;
+        self.handle
+            .by_ref()
+            .take(length as u64)
+            .read_to_end(&mut buffer)?;
         decrypt(&mut buffer);
         if let Some(nul_index) = buffer.iter().position(|&byte| byte == 0) {
             let over_read = buffer.len() - (nul_index + 1);
