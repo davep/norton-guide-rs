@@ -270,7 +270,7 @@ impl Reader {
     pub fn read_encrypted_stringz(&mut self, length: usize, rle: RleFn) -> io::Result<String> {
         let postion = self.position()?;
         let result = self.read_encrypted_string(length, rle)?;
-        self.goto(postion + result.len() as u64)?;
+        self.goto(postion + result.len() as u64 + 1)?;
         Ok(result)
     }
 }
