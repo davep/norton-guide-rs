@@ -1,6 +1,8 @@
 use rstest::*;
 use std::path::PathBuf;
 
+use norton_guide::NortonGuide;
+
 #[fixture]
 fn test_files() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -26,6 +28,11 @@ pub fn empty_guide(test_files: PathBuf) -> PathBuf {
 #[fixture]
 pub fn not_a_guide(test_files: PathBuf) -> PathBuf {
     test_files.join("not.ng")
+}
+
+#[fixture]
+pub fn os_lib(test_files: PathBuf) -> NortonGuide {
+    NortonGuide::open(test_files.join("oslib.ng")).unwrap()
 }
 
 // fixtures.rs ends here

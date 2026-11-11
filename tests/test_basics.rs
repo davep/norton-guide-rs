@@ -158,4 +158,4 @@ fn test_guide_credits(valid_guide: PathBuf) {
     );
 }
 
-// test_guide.rs ends here
+// test_basics.rs ends here

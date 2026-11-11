@@ -3,7 +3,8 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::entry::Menu;
+use crate::entry::types::EntryType;
+use crate::entry::{Common, Entry, Long, Menu, Short};
 use crate::errors::NortonGuideError;
 use crate::header::Header;
 use crate::magic::GuideMaker;
@@ -123,6 +124,17 @@ impl NortonGuide {
     /// * `&mut Reader` - A mutable reference to the `Reader` instance.
     pub fn reader(&mut self) -> &mut Reader {
         &mut self.reader
+    }
+
+    pub fn load(&mut self) -> Result<Entry, NortonGuideError> {
+        let common = Common::new(self.reader())?;
+        match common.entry_type {
+            EntryType::Short => Ok(Entry::Short(Short::new(common, self.reader())?)),
+            EntryType::Long => Ok(Entry::Long(Long::new(common, self.reader())?)),
+            _ => Err(NortonGuideError::UnexpectedEntryTypeError {
+                found: common.entry_type as u16,
+            }),
+        }
     }
 }
 

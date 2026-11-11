@@ -39,7 +39,7 @@ impl Menu {
     pub fn new(guide: &mut Reader) -> Result<Self, NortonGuideError> {
         let entry_type = guide.read_encrypted_word()?;
         if entry_type != (EntryType::Menu as u16) {
-            return Err(NortonGuideError::BadEntryError {
+            return Err(NortonGuideError::BadEntryTypeError {
                 expected: EntryType::Menu as u16,
                 found: entry_type,
             });
