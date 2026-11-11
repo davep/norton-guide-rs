@@ -2,8 +2,8 @@ mod fixtures;
 
 use fixtures::*;
 
-use norton_guide::NortonGuide;
 use norton_guide::magic::GuideMaker;
+use norton_guide::{NortonGuide, NortonGuideError};
 use std::io::ErrorKind;
 use std::path::PathBuf;
 
@@ -11,10 +11,10 @@ use rstest::*;
 
 #[rstest]
 fn test_open_non_existent_file_fails(missing_guide: PathBuf) {
-    assert_eq!(
-        NortonGuide::open(missing_guide).unwrap_err().kind(),
-        ErrorKind::NotFound
-    );
+    assert!(matches!(
+        NortonGuide::open(missing_guide).unwrap_err(),
+        NortonGuideError::Io(e) if e.kind() == ErrorKind::NotFound
+    ));
 }
 
 #[rstest]
@@ -29,10 +29,10 @@ fn test_path_method_returns_correct_path(valid_guide: PathBuf) {
 
 #[rstest]
 fn test_open_empty_file_fails(empty_guide: PathBuf) {
-    assert_eq!(
-        NortonGuide::open(empty_guide).unwrap_err().kind(),
-        ErrorKind::UnexpectedEof
-    );
+    assert!(matches!(
+        NortonGuide::open(empty_guide).unwrap_err(),
+        NortonGuideError::Io(e) if e.kind() == ErrorKind::UnexpectedEof
+    ));
 }
 
 #[rstest]
@@ -42,10 +42,10 @@ fn test_is_valid(valid_guide: PathBuf) {
 
 #[rstest]
 fn test_is_not_valid(not_a_guide: PathBuf) {
-    assert_eq!(
-        NortonGuide::open(not_a_guide).unwrap_err().kind(),
-        ErrorKind::InvalidData
-    );
+    assert!(matches!(
+        NortonGuide::open(not_a_guide).unwrap_err(),
+        NortonGuideError::BadMagicError { .. }
+    ));
 }
 
 #[rstest]

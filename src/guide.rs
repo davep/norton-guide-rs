@@ -1,10 +1,10 @@
 //! This module defines the `NortonGuide` struct, which represents a Norton
 //! Guide database file.
 
-use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::entry::Menu;
+use crate::errors::NortonGuideError;
 use crate::header::Header;
 use crate::magic::GuideMaker;
 use crate::reader::Reader;
@@ -35,15 +35,14 @@ impl NortonGuide {
     /// * `io::Result<Self>` - Returns an `Ok(NortonGuide)` if successful,
     ///   or an `Err(io::Error)` if opening the file or reading the header
     ///   fails.
-    pub fn open(path: impl AsRef<Path>) -> io::Result<Self> {
+    pub fn open(path: impl AsRef<Path>) -> Result<Self, NortonGuideError> {
         let path = path.as_ref().to_path_buf();
         let mut reader = Reader::new(&path)?;
         let header = Header::new(&mut reader)?;
         if !GuideMaker::from_magic(header.magic()).is_valid() {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "Invalid Norton Guide file: magic number does not match.",
-            ));
+            return Err(NortonGuideError::BadMagicError {
+                found: header.magic(),
+            });
         }
         let mut menus = Vec::with_capacity(header.menu_count() as usize);
         for _ in 0..header.menu_count() {

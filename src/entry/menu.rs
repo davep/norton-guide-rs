@@ -1,5 +1,7 @@
 //! Provides code for working with menu entries in a Norton Guide database.
 
+use crate::NortonGuideError;
+use crate::entry::types::EntryType;
 use crate::reader::Reader;
 use crate::rle::clean_rle;
 
@@ -30,9 +32,16 @@ impl Menu {
     ///
     /// * `std::io::Result<Self>` - Returns an `Ok(Menu)` if successful, or
     ///   an `Err(std::io::Error)` if reading fails.
-    pub fn new(guide: &mut Reader) -> std::io::Result<Self> {
-        // Skip the type marker and the byte size of the menu.
-        guide.skip(4)?;
+    pub fn new(guide: &mut Reader) -> Result<Self, NortonGuideError> {
+        let entry_type = guide.read_encrypted_word()?;
+        if entry_type != (EntryType::Menu as u16) {
+            return Err(NortonGuideError::BadEntryError {
+                expected: EntryType::Menu as u16,
+                found: entry_type,
+            });
+        };
+        // Skip the byte size of the menu.
+        guide.skip(2)?;
         // I can't for the life of me remember while I subtracted 1 from the
         // count, but it seems to be necessary for the menu to work
         // properly.
@@ -80,4 +89,5 @@ impl Menu {
         self.offsets.get(index).copied()
     }
 }
+
 // menu.rs ends here
