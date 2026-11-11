@@ -17,17 +17,22 @@ fn test_first_entry_is_short(mut os_lib: NortonGuide) {
 
 #[rstest]
 fn test_first_line_of_first_entry_is_correct(mut os_lib: NortonGuide) {
-    let short: Short = os_lib.load().unwrap().try_into().unwrap();
     assert_eq!(
-        short.lines.first().unwrap(),
+        Short::try_from(os_lib.load().unwrap())
+            .unwrap()
+            .lines
+            .first()
+            .unwrap(),
         " OL_95AppTitle()          Set/get the Windows 95 application title."
     );
 }
 
 #[rstest]
 fn test_first_entry_has_correct_line_count(mut os_lib: NortonGuide) {
-    let short: Short = os_lib.load().unwrap().try_into().unwrap();
-    assert_eq!(short.lines.len(), 13);
+    assert_eq!(
+        Short::try_from(os_lib.load().unwrap()).unwrap().lines.len(),
+        13
+    );
 }
 
 // test_rich_guide.rs ends here
