@@ -14,6 +14,9 @@ pub struct Menu {
     prompts: Vec<String>,
 }
 
+/// The maximum length of a prompt in menus, in bytes.
+const MAX_PROMPT_LENGTH: usize = 128;
+
 /// Implementations for the `Menu` struct.
 impl Menu {
     /// Creates and populates a new `Menu` instance.
@@ -42,13 +45,11 @@ impl Menu {
         }
         // Skip a number of values I don't know the purpose of, but I've
         // never needed. It seems to be two sets of long integer arrays.
-        guide.skip((count * 8) as i64)?;
-        let title_length = guide.read_encrypted_word()? as usize;
-        let title = guide.read_string(title_length)?;
+        guide.skip(((count + 1) * 8) as i64)?;
+        let title = guide.read_encrypted_stringz(MAX_PROMPT_LENGTH, clean_rle)?;
         let mut prompts = Vec::with_capacity(count as usize);
         for _ in 0..count {
-            let prompt_length = guide.read_encrypted_word()? as usize;
-            prompts.push(guide.read_encrypted_stringz(prompt_length, clean_rle)?);
+            prompts.push(guide.read_encrypted_stringz(MAX_PROMPT_LENGTH, clean_rle)?);
         }
         guide.skip(1)?; // Skip the final reserved byte.
         Ok(Self {
