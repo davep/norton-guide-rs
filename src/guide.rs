@@ -65,10 +65,12 @@ impl NortonGuide {
         &self.path
     }
 
+    /// Returns the magic number of the Norton Guide file as a `GuideMaker`.
     pub fn magic(&self) -> GuideMaker {
         GuideMaker::from_magic(self.header.magic())
     }
 
+    /// Returns whether the Norton Guide file is valid based on its magic number.
     pub fn is_valid(&self) -> bool {
         self.magic().is_valid()
     }
@@ -97,6 +99,7 @@ impl NortonGuide {
         self.header.menu_count()
     }
 
+    /// Returns a reference to the `Menu` at the specified index.
     pub fn menu(&self, index: usize) -> Option<&Menu> {
         self.menus.get(index)
     }
