@@ -16,9 +16,12 @@ pub use types::EntryType;
 
 use crate::NortonGuideError;
 
+/// The `Entry` enum represents a Norton Guide entry, which can be either a short or long entry.
 #[derive(Debug, Clone)]
 pub enum Entry {
+    /// The entry is a short entry.
     Short(Short),
+    /// The entry is a long entry.
     Long(Long),
 }
 
