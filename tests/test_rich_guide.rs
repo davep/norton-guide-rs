@@ -99,31 +99,57 @@ fn test_first_entry_has_correct_line_count(mut os_lib: NortonGuide) {
 }
 
 #[rstest]
+fn test_repeated_load_loads_same_entry(mut os_lib: NortonGuide) {
+    assert_eq!(
+        Short::try_from(os_lib.load().unwrap())
+            .unwrap()
+            .common
+            .offset,
+        Short::try_from(os_lib.load().unwrap())
+            .unwrap()
+            .common
+            .offset
+    );
+}
+
+#[rstest]
 fn test_second_entry_is_long(mut os_lib: NortonGuide) {
-    let _ = os_lib.load();
-    assert!(matches!(os_lib.load().unwrap(), Entry::Long(_)));
+    assert!(matches!(
+        os_lib.skip().unwrap().load().unwrap(),
+        Entry::Long(_)
+    ));
 }
 
 #[rstest]
 fn test_second_entry_has_correct_line_count(mut os_lib: NortonGuide) {
-    let _ = os_lib.load();
     assert_eq!(
-        Long::try_from(os_lib.load().unwrap()).unwrap().lines.len(),
+        Long::try_from(os_lib.skip().unwrap().load().unwrap())
+            .unwrap()
+            .lines
+            .len(),
         38
     );
 }
 
 #[rstest]
 fn test_second_entry_first_line_is_correct(mut os_lib: NortonGuide) {
-    let _ = os_lib.load();
     assert_eq!(
-        Long::try_from(os_lib.load().unwrap())
+        Long::try_from(os_lib.skip().unwrap().load().unwrap())
             .unwrap()
             .lines
             .first()
             .unwrap(),
         " ^bOL_95AppTitle()"
     );
+}
+
+#[rstest]
+fn test_count_entries(mut os_lib: NortonGuide) {
+    let mut count = 0;
+    while os_lib.skip().is_ok() {
+        count += 1;
+    }
+    assert_eq!(count, 28);
 }
 
 // test_rich_guide.rs ends here
