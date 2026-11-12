@@ -130,14 +130,27 @@ impl NortonGuide {
     }
 
     pub fn load(&mut self) -> Result<Entry, NortonGuideError> {
+        let position = self.reader().position()?;
         let common = Common::new(self.reader())?;
-        match common.entry_type {
+        let result = match common.entry_type {
             EntryType::Short => Ok(Entry::Short(Short::new(common, self.reader())?)),
             EntryType::Long => Ok(Entry::Long(Long::new(common, self.reader())?)),
             _ => Err(NortonGuideError::UnexpectedEntryTypeError {
                 found: common.entry_type as u16,
             }),
+        };
+        self.reader.goto(position)?;
+        result
+    }
+
+    pub fn skip(&mut self) -> Result<&mut Self, NortonGuideError> {
+        let entry_type = self.reader.read_encrypted_word()?;
+        if EntryType::try_from(entry_type).is_err() {
+            return Err(NortonGuideError::UnexpectedEntryTypeError { found: entry_type });
         }
+        let entry_size = self.reader.read_encrypted_word()? as i64;
+        self.reader.skip(entry_size + 22)?;
+        Ok(self)
     }
 }
 
