@@ -9,6 +9,90 @@ use fixtures::*;
 
 use norton_guide::NortonGuide;
 use norton_guide::entry::{Entry, Long, Short};
+use norton_guide::magic::GuideMaker;
+
+#[rstest]
+fn test_os_lib_magic(os_lib: NortonGuide) {
+    assert_eq!(
+        os_lib.magic(),
+        GuideMaker::NortonGuide
+    );
+}
+
+#[rstest]
+fn test_os_lib_is_valid(os_lib: NortonGuide) {
+    assert!(os_lib.is_valid());
+}
+
+#[rstest]
+fn test_os_lib_title(os_lib: NortonGuide) {
+    assert_eq!(
+        os_lib.title(),
+        "OSLIB v1.06"
+    );
+}
+
+#[rstest]
+fn test_os_lib_credits(os_lib: NortonGuide) {
+    assert_eq!(
+        os_lib.credits(),
+        // &[
+        //     "│ OSLIB v1.06",
+        //     "│ OSLIB Is Free Software with NO WARRANTY!",
+        //     "│",
+        //     "│ This library was compiled by Dave Pearson.",
+        //     "│ davep@hagbard.demon.co.uk",
+        // ]
+        // TODO: Need to adding undosify support.
+        &[
+            "� OSLIB v1.06",
+            "� OSLIB Is Free Software with NO WARRANTY!",
+            "�",
+            "� This library was compiled by Dave Pearson.",
+            "� davep@hagbard.demon.co.uk",
+        ]
+    );
+}
+
+#[rstest]
+fn test_magic_string(os_lib: NortonGuide) {
+    assert_eq!(
+        os_lib.magic_string(),
+        "NG"
+    );
+}
+
+#[rstest]
+fn test_made_with(os_lib: NortonGuide) {
+    assert_eq!(
+        os_lib.made_with(),
+        "Norton Guide"
+    );
+}
+
+#[rstest]
+fn test_menu_count(os_lib: NortonGuide) {
+    assert_eq!(
+        os_lib.menu_count(),
+        1
+    );
+}
+
+#[rstest]
+fn test_menu_title(os_lib: NortonGuide) {
+    assert_eq!(
+        os_lib.menu(0).unwrap().title(),
+        "OSLIB"
+    );
+}
+
+#[rstest]
+fn test_menu_prompt_count(os_lib: NortonGuide) {
+    assert_eq!(
+        os_lib.menu(0).unwrap().prompt_count(),
+        5
+    );
+}
 
 #[rstest]
 fn test_first_entry_is_short(mut os_lib: NortonGuide) {
