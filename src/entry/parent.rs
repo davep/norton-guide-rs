@@ -21,15 +21,11 @@ pub struct EntryParent {
 /// Implementations for the `EntryParent` struct.
 impl EntryParent {
     pub fn new(guide: &mut Reader) -> io::Result<Self> {
-        let line = optional_index(guide.read_encrypted_word()?);
-        let offset = optional_offset(guide.read_encrypted_long()?);
-        let menu = optional_index(guide.read_encrypted_word()?);
-        let prompt = optional_index(guide.read_encrypted_word()?);
         Ok(Self {
-            line,
-            offset,
-            menu,
-            prompt,
+            line: optional_index(guide.read_encrypted_word()?),
+            offset: optional_offset(guide.read_encrypted_long()?),
+            menu: optional_index(guide.read_encrypted_word()?),
+            prompt: optional_index(guide.read_encrypted_word()?),
         })
     }
 
