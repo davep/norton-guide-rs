@@ -152,4 +152,19 @@ fn test_count_entries(mut os_lib: NortonGuide) {
     assert_eq!(count, 28);
 }
 
+#[rstest]
+fn test_count_entry_types(mut os_lib: NortonGuide) {
+    let mut short_count = 0;
+    let mut long_count = 0;
+    while let Ok(entry) = os_lib.load() {
+        match entry {
+            Entry::Short(_) => short_count += 1,
+            Entry::Long(_) => long_count += 1,
+        }
+        os_lib.skip().unwrap();
+    }
+    assert_eq!(short_count, 3);
+    assert_eq!(long_count, 25);
+}
+
 // test_rich_guide.rs ends here
