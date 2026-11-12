@@ -13,10 +13,7 @@ use norton_guide::magic::GuideMaker;
 
 #[rstest]
 fn test_os_lib_magic(os_lib: NortonGuide) {
-    assert_eq!(
-        os_lib.magic(),
-        GuideMaker::NortonGuide
-    );
+    assert_eq!(os_lib.magic(), GuideMaker::NortonGuide);
 }
 
 #[rstest]
@@ -26,10 +23,7 @@ fn test_os_lib_is_valid(os_lib: NortonGuide) {
 
 #[rstest]
 fn test_os_lib_title(os_lib: NortonGuide) {
-    assert_eq!(
-        os_lib.title(),
-        "OSLIB v1.06"
-    );
+    assert_eq!(os_lib.title(), "OSLIB v1.06");
 }
 
 #[rstest]
@@ -56,42 +50,27 @@ fn test_os_lib_credits(os_lib: NortonGuide) {
 
 #[rstest]
 fn test_magic_string(os_lib: NortonGuide) {
-    assert_eq!(
-        os_lib.magic_string(),
-        "NG"
-    );
+    assert_eq!(os_lib.magic_string(), "NG");
 }
 
 #[rstest]
 fn test_made_with(os_lib: NortonGuide) {
-    assert_eq!(
-        os_lib.made_with(),
-        "Norton Guide"
-    );
+    assert_eq!(os_lib.made_with(), "Norton Guide");
 }
 
 #[rstest]
 fn test_menu_count(os_lib: NortonGuide) {
-    assert_eq!(
-        os_lib.menu_count(),
-        1
-    );
+    assert_eq!(os_lib.menu_count(), 1);
 }
 
 #[rstest]
 fn test_menu_title(os_lib: NortonGuide) {
-    assert_eq!(
-        os_lib.menu(0).unwrap().title(),
-        "OSLIB"
-    );
+    assert_eq!(os_lib.menu(0).unwrap().title(), "OSLIB");
 }
 
 #[rstest]
 fn test_menu_prompt_count(os_lib: NortonGuide) {
-    assert_eq!(
-        os_lib.menu(0).unwrap().prompt_count(),
-        5
-    );
+    assert_eq!(os_lib.menu(0).unwrap().prompt_count(), 5);
 }
 
 #[rstest]
