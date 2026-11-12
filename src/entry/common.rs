@@ -42,23 +42,15 @@ impl Common {
     /// * `std::io::Result<Self>` - Returns an `Ok(Common)` if successful,
     ///   or an `Err(std::io::Error)` if reading fails.
     pub fn new(guide: &mut Reader) -> std::io::Result<Self> {
-        let offset = guide.position()?;
-        let entry_type: EntryType = EntryType::try_from(guide.read_encrypted_word()?).unwrap();
-        let size = guide.read_encrypted_word()?;
-        let line_count = guide.read_encrypted_word()?;
-        let has_see_also = guide.read_encrypted_word()? > 0;
-        let parent = EntryParent::new(guide)?;
-        let previous = guide.read_encrypted_long()?;
-        let next = guide.read_encrypted_long()?;
         Ok(Self {
-            offset,
-            entry_type,
-            size,
-            line_count,
-            has_see_also,
-            parent,
-            previous,
-            next,
+            offset: guide.position()?,
+            entry_type: EntryType::try_from(guide.read_encrypted_word()?).unwrap(),
+            size: guide.read_encrypted_word()?,
+            line_count: guide.read_encrypted_word()?,
+            has_see_also: guide.read_encrypted_word()? > 0,
+            parent: EntryParent::new(guide)?,
+            previous: guide.read_encrypted_long()?,
+            next: guide.read_encrypted_long()?,
         })
     }
 }
