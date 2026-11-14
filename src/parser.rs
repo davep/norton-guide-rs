@@ -316,52 +316,19 @@ mod tests {
     }
 
     #[rstest]
-    fn test_one_ctrl_a() {
-        const TEST_STRING: &str = "^aABTest";
+    #[case::single_ctrl_a("^aABTest", vec!["colour(0xAB)"])]
+    #[case::multiple_ctrl_a("^aABTest^aBCMoreText^aCD", vec!["colour(0xAB)", "colour(0xBC)", "colour(0xCD)"])]
+    #[case::toggle_ctrl_a("^aABTest^aABMoreText", vec!["colour(0xAB)", "normal"])]
+    #[case::ctrl_b_toggle("^bBoldText^bNormalText", vec!["bold", "unbold"])]
+    fn test_control_characters(#[case] input: &str, #[case] expected_events: Vec<&str>) {
         let mut events = ParserEventsMock::new();
-        let mut parser = Parser::new(TEST_STRING, &mut events);
+        let mut parser = Parser::new(input, &mut events);
         parser.parse();
-        assert_eq!(events.events, vec!["colour(0xAB)"]);
-    }
-
-    #[rstest]
-    fn test_ctrl_a_toggle() {
-        const TEST_STRING: &str = "^aABTest^aABBMoreText";
-        let mut events = ParserEventsMock::new();
-        let mut parser = Parser::new(TEST_STRING, &mut events);
-        parser.parse();
-        assert_eq!(events.events, vec!["colour(0xAB)", "normal"]);
-    }
-
-    #[rstest]
-    fn test_multiple_ctrl_a() {
-        const TEST_STRING: &str = "^aABTest^aBCMoreText^aCDEvenMore";
-        let mut events = ParserEventsMock::new();
-        let mut parser = Parser::new(TEST_STRING, &mut events);
-        parser.parse();
-        assert_eq!(
-            events.events,
-            vec![
-                "colour(0xAB)",
-                "colour(0xBC)",
-                "colour(0xCD)"
-            ]
-        );
+        assert_eq!(events.events, expected_events);
     }
 
     // TODO: Test for invalid hex after ^a.
 
-    #[rstest]
-    fn test_ctrl_b() {
-        const TEST_STRING: &str = "^bBoldText^bNormalText";
-        let mut events = ParserEventsMock::new();
-        let mut parser = Parser::new(TEST_STRING, &mut events);
-        parser.parse();
-        assert_eq!(
-            events.events,
-            vec!["bold", "unbold"]
-        );
-    }
 }
 
 // parser.rs ends here
