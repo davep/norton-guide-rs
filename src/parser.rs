@@ -72,7 +72,7 @@ struct ParseState {
 impl ParseState {
     fn new(string: impl Into<String>) -> Self {
         let raw = string.into();
-        let ctrl = raw.find(CTRL_CHAR as char);
+        let ctrl = raw.find(CTRL_CHAR);
         Self {
             raw,
             ctrl,
@@ -99,7 +99,7 @@ impl ParseState {
 
     fn find_next_ctrl(&mut self) {
         self.raw = self.raw[self.ctrl.unwrap_or(0)..].to_string();
-        self.ctrl = self.raw.find(CTRL_CHAR as char);
+        self.ctrl = self.raw.find(CTRL_CHAR);
     }
 
 }
