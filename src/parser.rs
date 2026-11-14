@@ -157,13 +157,12 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
                 self.state.last_attribute = Some(colour);
                 self.state.mode = TextMode::Attribute;
             }
-            self.state.move_ctrl(4);
         } else {
             // The hex for the attribute is not valid, so we'll treat it as
             // a literal string instead of a control code.
             self.events.on_text(&self.state.raw[..4]);
-            self.state.move_ctrl(2);
         }
+        self.state.move_ctrl(4);
     }
 
     fn ctrl_b(&mut self) {
@@ -358,6 +357,7 @@ mod tests {
     #[rstest]
     #[case::single_ctrl_a("^aABTest", vec!["colour(0xAB)"], vec!["Test"])]
     #[case::multiple_ctrl_a("^aABTest^aBCMoreText^aCD", vec!["colour(0xAB)", "colour(0xBC)", "colour(0xCD)"], vec!["Test", "MoreText"])]
+    #[case::invalid_hex_ctrl_a("^aZZTest", vec![], vec!["^aZZ", "Test"])]
     #[case::toggle_ctrl_a("^aABTest^aABMoreText", vec!["colour(0xAB)", "normal"], vec!["Test", "MoreText"])]
     #[case::ctrl_b_toggle("^bBoldText^bNormalText", vec!["bold", "unbold"], vec!["BoldText", "NormalText"])]
     #[case::ctrl_r_toggle("^rReverseText^rNormalText", vec!["reverse", "unreverse"], vec!["ReverseText", "NormalText"])]
@@ -369,9 +369,6 @@ mod tests {
         assert_eq!(events.events, expected_events);
         assert_eq!(events.text, expected_text);
     }
-
-    // TODO: Test for invalid hex after ^a.
-
 }
 
 // parser.rs ends here
