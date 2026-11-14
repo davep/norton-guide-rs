@@ -101,7 +101,6 @@ impl ParseState {
         self.raw = self.raw[self.ctrl.unwrap_or(0)..].to_string();
         self.ctrl = self.raw.find(CTRL_CHAR);
     }
-
 }
 
 pub trait ParserEvents {
@@ -131,19 +130,27 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
     }
 
     fn normal(&mut self) {
-        // if let Some(on_normal) = self.events.on_normal {
-        //     on_normal();
-        // }
+        self.events.on_normal();
+        self.state.mode = TextMode::Normal;
+        self.state.last_attribute = None;
     }
 
     fn ctrl_a(&mut self) {
-        if let Some(colour) = self.state.raw.get(2..4).and_then(|hex| u8::from_str_radix(hex, 16).ok()) {
+        let ctrl_index = self
+            .state
+            .ctrl
+            .expect("unexpected lack of control character to handle");
+        if let Some(colour) = self
+            .state
+            .raw
+            .get(ctrl_index + 2..ctrl_index + 4)
+            .and_then(|hex| u8::from_str_radix(hex, 16).ok())
+        {
             if self.state.mode == TextMode::Attribute && self.state.last_attribute == Some(colour) {
                 // If a colour attribute is already active and the same
                 // colour is being applied again, we will treat it as a
                 // toggle and return to normal mode.
                 self.normal();
-                self.state.mode = TextMode::Normal;
             } else {
                 // If a new colour attribute is being applied.
                 self.events.on_colour(colour);
@@ -160,6 +167,7 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
     }
 
     fn ctrl_b(&mut self) {
+        // Handle bold control code
     }
 
     fn ctrl_c(&mut self) {
@@ -167,7 +175,8 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
     }
 
     fn ctrl_n(&mut self) {
-        // Handle normal control code
+        self.normal();
+        self.state.move_ctrl(2);
     }
 
     fn ctrl_r(&mut self) {
@@ -180,18 +189,33 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
 
     pub fn parse(&mut self) {
         while self.state.work_left() {
-            let ctrl_index = self.state.ctrl.expect("unexpected lack of control character to handle");
+            let ctrl_index = self
+                .state
+                .ctrl
+                .expect("unexpected lack of control character to handle");
             if self.state.raw.chars().take(ctrl_index).count() > 0 {
                 self.events.on_text(&self.state.raw[..ctrl_index]);
             }
 
             match self.state.ctrl_id() {
-                Some(ControlCode::Attr) => {self.ctrl_a();}
-                Some(ControlCode::Bold) => {self.ctrl_b();}
-                Some(ControlCode::Char) => {self.ctrl_c();}
-                Some(ControlCode::Normal) => {self.ctrl_n();}
-                Some(ControlCode::Reverse) => {self.ctrl_r();}
-                Some(ControlCode::Underline) => {self.ctrl_u();}
+                Some(ControlCode::Attr) => {
+                    self.ctrl_a();
+                }
+                Some(ControlCode::Bold) => {
+                    self.ctrl_b();
+                }
+                Some(ControlCode::Char) => {
+                    self.ctrl_c();
+                }
+                Some(ControlCode::Normal) => {
+                    self.ctrl_n();
+                }
+                Some(ControlCode::Reverse) => {
+                    self.ctrl_r();
+                }
+                Some(ControlCode::Underline) => {
+                    self.ctrl_u();
+                }
                 Some(ControlCode::Control) => {
                     self.events.on_text("^");
                     self.state.move_ctrl(2);
@@ -208,7 +232,6 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
             self.state.find_next_ctrl();
         }
     }
-
 }
 
 #[cfg(test)]
@@ -226,7 +249,11 @@ mod tests {
     #[case::control(&['^'], ControlCode::Control)]
     #[case::unsupported(&['x', 'y', 'z'], ControlCode::Unsupported)]
     fn test_control_code_conversion(#[case] input: &[char], #[case] expected: ControlCode) {
-        assert!(input.iter().all(|&code| ControlCode::try_from(code) == Ok(expected)));
+        assert!(
+            input
+                .iter()
+                .all(|&code| ControlCode::try_from(code) == Ok(expected))
+        );
     }
 
     #[derive(Default)]
@@ -241,6 +268,10 @@ mod tests {
     }
 
     impl ParserEvents for ParserEventsMock {
+        fn on_normal(&mut self) {
+            self.events.push("on_normal()".to_string());
+        }
+
         fn on_colour(&mut self, colour: u8) {
             self.events.push(format!("on_colour(0x{colour:X})"));
         }
@@ -269,12 +300,21 @@ mod tests {
     }
 
     #[rstest]
-    fn test_ctrl_a() {
+    fn test_one_ctrl_a() {
         const TEST_STRING: &str = "^aABTest";
         let mut events = ParserEventsMock::new();
         let mut parser = Parser::new(TEST_STRING, &mut events);
         parser.parse();
         assert_eq!(events.events, vec!["on_colour(0xAB)"]);
+    }
+
+    #[rstest]
+    fn test_ctrl_a_toggle() {
+        const TEST_STRING: &str = "^aABTest^aABBMoreText";
+        let mut events = ParserEventsMock::new();
+        let mut parser = Parser::new(TEST_STRING, &mut events);
+        parser.parse();
+        assert_eq!(events.events, vec!["on_colour(0xAB)", "on_normal()"]);
     }
 }
 
