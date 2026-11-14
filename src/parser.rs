@@ -187,7 +187,14 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
     }
 
     fn ctrl_r(&mut self) {
-        // Handle reverse control code
+        if self.state.mode == TextMode::Reverse {
+            self.events.on_unreverse();
+            self.state.mode = TextMode::Normal;
+        } else {
+            self.events.on_reverse();
+            self.state.mode = TextMode::Reverse;
+        }
+        self.state.move_ctrl(2);
     }
 
     fn ctrl_u(&mut self) {
@@ -284,6 +291,14 @@ mod tests {
             self.events.push("unbold".to_string());
         }
 
+        fn on_reverse(&mut self) {
+            self.events.push("reverse".to_string());
+        }
+
+        fn on_unreverse(&mut self) {
+            self.events.push("unreverse".to_string());
+        }
+
         fn on_normal(&mut self) {
             self.events.push("normal".to_string());
         }
@@ -320,6 +335,7 @@ mod tests {
     #[case::multiple_ctrl_a("^aABTest^aBCMoreText^aCD", vec!["colour(0xAB)", "colour(0xBC)", "colour(0xCD)"])]
     #[case::toggle_ctrl_a("^aABTest^aABMoreText", vec!["colour(0xAB)", "normal"])]
     #[case::ctrl_b_toggle("^bBoldText^bNormalText", vec!["bold", "unbold"])]
+    #[case::ctrl_r_toggle("^rReverseText^rNormalText", vec!["reverse", "unreverse"])]
     fn test_control_characters(#[case] input: &str, #[case] expected_events: Vec<&str>) {
         let mut events = ParserEventsMock::new();
         let mut parser = Parser::new(input, &mut events);
