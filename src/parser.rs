@@ -231,7 +231,7 @@ mod tests {
 
     #[derive(Default)]
     struct ParserEventsMock {
-        colours: Vec<u8>,
+        events: Vec<String>,
     }
 
     impl ParserEventsMock {
@@ -242,7 +242,7 @@ mod tests {
 
     impl ParserEvents for ParserEventsMock {
         fn on_colour(&mut self, colour: u8) {
-            self.colours.push(colour);
+            self.events.push(format!("on_colour(0x{colour:X})"));
         }
     }
 
@@ -274,7 +274,7 @@ mod tests {
         let mut events = ParserEventsMock::new();
         let mut parser = Parser::new(TEST_STRING, &mut events);
         parser.parse();
-        assert_eq!(events.colours, vec![0xAB]);
+        assert_eq!(events.events, vec!["on_colour(0xAB)"]);
     }
 }
 
