@@ -187,26 +187,21 @@ impl<E: ParserEvents> Parser<E> {
 
             match self.state.ctrl_id() {
                 Some(ControlCode::Attr) => {self.ctrl_a();}
-                Some(ControlCode::Bold) => {
-                    // Handle bold control code
-                }
-                Some(ControlCode::Char) => {
-                    // Handle character control code
-                }
-                Some(ControlCode::Normal) => {
-                    // Handle normal control code
-                }
-                Some(ControlCode::Reverse) => {
-                    // Handle reverse control code
-                }
-                Some(ControlCode::Underline) => {
-                    // Handle underline control code
-                }
+                Some(ControlCode::Bold) => {self.ctrl_b();}
+                Some(ControlCode::Char) => {self.ctrl_c();}
+                Some(ControlCode::Normal) => {self.ctrl_n();}
+                Some(ControlCode::Reverse) => {self.ctrl_r();}
+                Some(ControlCode::Underline) => {self.ctrl_u();}
                 Some(ControlCode::Control) => {
-                    // Handle control character control code
+                    self.events.on_text("^");
+                    self.state.move_ctrl(2);
                 }
                 Some(ControlCode::Unsupported) | None => {
-                    // Handle unsupported or unknown control code
+                    // So the character after the ^ is not a valid control
+                    // code. The choices here are to either raise an error,
+                    // or just ignore it. Given that nobody is going to be
+                    // fixing broken guides these days, we'll just ignore it.
+                    self.state.move_ctrl(1);
                 }
             }
 
