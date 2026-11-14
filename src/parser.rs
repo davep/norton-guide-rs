@@ -252,6 +252,11 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
 
             self.state.find_next_ctrl();
         }
+
+        // Sweep up any remaining text after the last control code.
+        if self.state.raw.chars().count() > 0 {
+            self.events.on_text(&self.state.raw);
+        }
     }
 }
 
@@ -280,6 +285,7 @@ mod tests {
     #[derive(Default)]
     struct ParserEventsMock {
         events: Vec<String>,
+        text: Vec<String>,
     }
 
     impl ParserEventsMock {
@@ -289,6 +295,10 @@ mod tests {
     }
 
     impl ParserEvents for ParserEventsMock {
+
+        fn on_text(&mut self, text: &str) {
+            self.text.push(text.to_string());
+        }
 
         fn on_bold(&mut self) {
             self.events.push("bold".to_string());
@@ -346,17 +356,18 @@ mod tests {
     }
 
     #[rstest]
-    #[case::single_ctrl_a("^aABTest", vec!["colour(0xAB)"])]
-    #[case::multiple_ctrl_a("^aABTest^aBCMoreText^aCD", vec!["colour(0xAB)", "colour(0xBC)", "colour(0xCD)"])]
-    #[case::toggle_ctrl_a("^aABTest^aABMoreText", vec!["colour(0xAB)", "normal"])]
-    #[case::ctrl_b_toggle("^bBoldText^bNormalText", vec!["bold", "unbold"])]
-    #[case::ctrl_r_toggle("^rReverseText^rNormalText", vec!["reverse", "unreverse"])]
-    #[case::ctrl_u_toggle("^uUnderlineText^uNormalText", vec!["underline", "ununderline"])]
-    fn test_control_characters(#[case] input: &str, #[case] expected_events: Vec<&str>) {
+    #[case::single_ctrl_a("^aABTest", vec!["colour(0xAB)"], vec!["Test"])]
+    #[case::multiple_ctrl_a("^aABTest^aBCMoreText^aCD", vec!["colour(0xAB)", "colour(0xBC)", "colour(0xCD)"], vec!["Test", "MoreText"])]
+    #[case::toggle_ctrl_a("^aABTest^aABMoreText", vec!["colour(0xAB)", "normal"], vec!["Test", "MoreText"])]
+    #[case::ctrl_b_toggle("^bBoldText^bNormalText", vec!["bold", "unbold"], vec!["BoldText", "NormalText"])]
+    #[case::ctrl_r_toggle("^rReverseText^rNormalText", vec!["reverse", "unreverse"], vec!["ReverseText", "NormalText"])]
+    #[case::ctrl_u_toggle("^uUnderlineText^uNormalText", vec!["underline", "ununderline"], vec!["UnderlineText", "NormalText"])]
+    fn test_control_characters(#[case] input: &str, #[case] expected_events: Vec<&str>, #[case] expected_text: Vec<&str>) {
         let mut events = ParserEventsMock::new();
         let mut parser = Parser::new(input, &mut events);
         parser.parse();
         assert_eq!(events.events, expected_events);
+        assert_eq!(events.text, expected_text);
     }
 
     // TODO: Test for invalid hex after ^a.
