@@ -177,6 +177,8 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
     }
 
     fn ctrl_c(&mut self) {
+        // TODO!
+        panic!("Control code ^c is not yet implemented");
         // Handle character control code
     }
 
