@@ -207,7 +207,7 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
         self.state.move_ctrl(2);
     }
 
-    pub fn parse(&mut self) {
+    pub fn parse(&mut self) -> &Self {
         while self.state.work_left() {
             let ctrl_index = self
                 .state
@@ -256,6 +256,8 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
         if self.state.raw.chars().count() > 0 {
             self.events.on_text(&self.state.raw);
         }
+
+        self
     }
 }
 
@@ -368,8 +370,7 @@ mod tests {
         #[case] expected_text: Vec<&str>,
     ) {
         let mut events = ParserEventsMock::new();
-        let mut parser = Parser::new(input, &mut events);
-        parser.parse();
+        Parser::new(input, &mut events).parse();
         assert_eq!(events.events, expected_events);
         assert_eq!(events.text, expected_text);
     }
