@@ -167,7 +167,14 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
     }
 
     fn ctrl_b(&mut self) {
-        // Handle bold control code
+        if self.state.mode == TextMode::Bold {
+            self.events.on_unbold();
+            self.state.mode = TextMode::Normal;
+        } else {
+            self.events.on_bold();
+            self.state.mode = TextMode::Bold;
+        }
+        self.state.move_ctrl(2);
     }
 
     fn ctrl_c(&mut self) {
@@ -268,12 +275,21 @@ mod tests {
     }
 
     impl ParserEvents for ParserEventsMock {
+
+        fn on_bold(&mut self) {
+            self.events.push("bold".to_string());
+        }
+
+        fn on_unbold(&mut self) {
+            self.events.push("unbold".to_string());
+        }
+
         fn on_normal(&mut self) {
-            self.events.push("on_normal()".to_string());
+            self.events.push("normal".to_string());
         }
 
         fn on_colour(&mut self, colour: u8) {
-            self.events.push(format!("on_colour(0x{colour:X})"));
+            self.events.push(format!("colour(0x{colour:X})"));
         }
     }
 
@@ -305,7 +321,7 @@ mod tests {
         let mut events = ParserEventsMock::new();
         let mut parser = Parser::new(TEST_STRING, &mut events);
         parser.parse();
-        assert_eq!(events.events, vec!["on_colour(0xAB)"]);
+        assert_eq!(events.events, vec!["colour(0xAB)"]);
     }
 
     #[rstest]
@@ -314,7 +330,7 @@ mod tests {
         let mut events = ParserEventsMock::new();
         let mut parser = Parser::new(TEST_STRING, &mut events);
         parser.parse();
-        assert_eq!(events.events, vec!["on_colour(0xAB)", "on_normal()"]);
+        assert_eq!(events.events, vec!["colour(0xAB)", "normal"]);
     }
 
     #[rstest]
@@ -326,10 +342,24 @@ mod tests {
         assert_eq!(
             events.events,
             vec![
-                "on_colour(0xAB)",
-                "on_colour(0xBC)",
-                "on_colour(0xCD)"
+                "colour(0xAB)",
+                "colour(0xBC)",
+                "colour(0xCD)"
             ]
+        );
+    }
+
+    // TODO: Test for invalid hex after ^a.
+
+    #[rstest]
+    fn test_ctrl_b() {
+        const TEST_STRING: &str = "^bBoldText^bNormalText";
+        let mut events = ParserEventsMock::new();
+        let mut parser = Parser::new(TEST_STRING, &mut events);
+        parser.parse();
+        assert_eq!(
+            events.events,
+            vec!["bold", "unbold"]
         );
     }
 }
