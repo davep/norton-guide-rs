@@ -198,7 +198,14 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
     }
 
     fn ctrl_u(&mut self) {
-        // Handle underline control code
+        if self.state.mode == TextMode::Underline {
+            self.events.on_ununderline();
+            self.state.mode = TextMode::Normal;
+        } else {
+            self.events.on_underline();
+            self.state.mode = TextMode::Underline;
+        }
+        self.state.move_ctrl(2);
     }
 
     pub fn parse(&mut self) {
@@ -299,6 +306,14 @@ mod tests {
             self.events.push("unreverse".to_string());
         }
 
+        fn on_underline(&mut self) {
+            self.events.push("underline".to_string());
+        }
+
+        fn on_ununderline(&mut self) {
+            self.events.push("ununderline".to_string());
+        }
+
         fn on_normal(&mut self) {
             self.events.push("normal".to_string());
         }
@@ -336,6 +351,7 @@ mod tests {
     #[case::toggle_ctrl_a("^aABTest^aABMoreText", vec!["colour(0xAB)", "normal"])]
     #[case::ctrl_b_toggle("^bBoldText^bNormalText", vec!["bold", "unbold"])]
     #[case::ctrl_r_toggle("^rReverseText^rNormalText", vec!["reverse", "unreverse"])]
+    #[case::ctrl_u_toggle("^uUnderlineText^uNormalText", vec!["underline", "ununderline"])]
     fn test_control_characters(#[case] input: &str, #[case] expected_events: Vec<&str>) {
         let mut events = ParserEventsMock::new();
         let mut parser = Parser::new(input, &mut events);
