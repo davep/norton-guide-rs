@@ -117,13 +117,13 @@ pub trait ParserEvents {
     fn on_ununderline(&mut self) {}
 }
 
-pub struct Parser<E: ParserEvents> {
+pub struct Parser<'a, E: ParserEvents> {
     state: ParseState,
-    events: E,
+    events: &'a mut E,
 }
 
-impl<E: ParserEvents> Parser<E> {
-    pub fn new(string: impl Into<String>, events: E) -> Self {
+impl<'a, E: ParserEvents> Parser<'a, E> {
+    pub fn new(string: impl Into<String>, events: &'a mut E) -> Self {
         Self {
             state: ParseState::new(string),
             events,
@@ -234,6 +234,12 @@ mod tests {
         colours: Vec<u8>,
     }
 
+    impl ParserEventsMock {
+        fn new() -> Self {
+            Self::default()
+        }
+    }
+
     impl ParserEvents for ParserEventsMock {
         fn on_colour(&mut self, colour: u8) {
             self.colours.push(colour);
@@ -243,7 +249,8 @@ mod tests {
     #[rstest]
     fn test_initial_parser_state_no_ctrl() {
         const TEST_STRING: &str = "This is a test string without control characters.";
-        let parser = Parser::new(TEST_STRING, ParserEventsMock::default());
+        let mut events = ParserEventsMock::new();
+        let parser = Parser::new(TEST_STRING, &mut events);
         assert_eq!(parser.state.raw, TEST_STRING);
         assert_eq!(parser.state.ctrl, None);
         assert!(matches!(parser.state.mode, TextMode::Normal));
@@ -253,7 +260,8 @@ mod tests {
     #[rstest]
     fn test_initial_parser_state_with_ctrl() {
         const TEST_STRING: &str = "This is a ^btest^b string with a control character.";
-        let parser = Parser::new(TEST_STRING, ParserEventsMock::default());
+        let mut events = ParserEventsMock::new();
+        let parser = Parser::new(TEST_STRING, &mut events);
         assert_eq!(parser.state.raw, TEST_STRING);
         assert_eq!(parser.state.ctrl, Some(10)); // Index of the first control character '^'
         assert!(matches!(parser.state.mode, TextMode::Normal));
@@ -263,8 +271,10 @@ mod tests {
     #[rstest]
     fn test_ctrl_a() {
         const TEST_STRING: &str = "^aABTest";
-        let mut parser = Parser::new(TEST_STRING, ParserEventsMock::default());
+        let mut events = ParserEventsMock::new();
+        let mut parser = Parser::new(TEST_STRING, &mut events);
         parser.parse();
+        assert_eq!(events.colours, vec![0xAB]);
     }
 }
 
