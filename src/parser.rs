@@ -316,6 +316,22 @@ mod tests {
         parser.parse();
         assert_eq!(events.events, vec!["on_colour(0xAB)", "on_normal()"]);
     }
+
+    #[rstest]
+    fn test_multiple_ctrl_a() {
+        const TEST_STRING: &str = "^aABTest^aBCMoreText^aCDEvenMore";
+        let mut events = ParserEventsMock::new();
+        let mut parser = Parser::new(TEST_STRING, &mut events);
+        parser.parse();
+        assert_eq!(
+            events.events,
+            vec![
+                "on_colour(0xAB)",
+                "on_colour(0xBC)",
+                "on_colour(0xCD)"
+            ]
+        );
+    }
 }
 
 // parser.rs ends here
