@@ -215,7 +215,7 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
                 .state
                 .ctrl
                 .expect("unexpected lack of control character to handle");
-            if self.state.raw.chars().take(ctrl_index).count() > 0 {
+            if ctrl_index > 0 {
                 self.events.on_text(&self.state.raw[..ctrl_index]);
             }
 
@@ -255,7 +255,7 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
         }
 
         // Sweep up any remaining text after the last control code.
-        if self.state.raw.chars().count() > 0 {
+        if !self.state.raw.is_empty() {
             self.events.on_text(&self.state.raw);
         }
 
