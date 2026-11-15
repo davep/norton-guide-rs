@@ -364,6 +364,7 @@ mod tests {
     #[case::many_ctrls("^bBold^rReverse^uUnderline^nNormal", vec!["bold", "reverse", "underline", "normal"], vec!["Bold", "Reverse", "Underline", "Normal"])]
     #[case::unsupported_ctrl("^xUnsupported^yUnsupported", vec![], vec!["xUnsupported", "yUnsupported"])]
     #[case::literal_ctrl("^^ literal ^^", vec![], vec!["^", " literal ", "^"])]
+    #[case::lone_dangling_ctrl("^", vec![], vec![])]
     #[case::dangling_ctrl("Test^", vec![], vec!["Test"])]
     fn test_control_characters(
         #[case] input: &str,
