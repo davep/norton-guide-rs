@@ -115,12 +115,12 @@ impl<'a> Parser<'a> {
         ParseEvent::Normal
     }
 
+    fn parse_hex_byte(&mut self) -> Option<u8> {
+        u8::from_str_radix(self.raw.get(2..4)?, 16).ok()
+    }
+
     fn ctrl_a(&mut self) -> ParseEvent<'a> {
-        let event = if let Some(colour) = self
-            .raw
-            .get(2..4)
-            .and_then(|hex| u8::from_str_radix(hex, 16).ok())
-        {
+        let event = if let Some(colour) = self.parse_hex_byte() {
             if self.mode == TextMode::Attribute && self.last_attribute == Some(colour) {
                 // If a colour attribute is already active and the same
                 // colour is being applied again, we will treat it as a
@@ -153,9 +153,15 @@ impl<'a> Parser<'a> {
     }
 
     fn ctrl_c(&mut self) -> ParseEvent<'a> {
-        // TODO!
-        panic!("Control code ^c is not yet implemented");
-        // Handle character control code
+        let event = if let Some(ch) = self.parse_hex_byte() {
+            ParseEvent::Char(ch as char)
+        } else {
+            // The hex for the character is not valid, so we'll treat it as
+            // a literal string instead of a control code.
+            ParseEvent::Text(&self.raw[..4.min(self.raw.len())])
+        };
+        self.advance(4);
+        event
     }
 
     fn ctrl_n(&mut self) -> ParseEvent<'a> {
@@ -271,6 +277,12 @@ mod tests {
         "^bBoldText^bNormalText",
         vec![Bold(true), Text("BoldText"), Bold(false), Text("NormalText")]
     )]
+    #[case::single_ctrl_c("^c41Test", vec![Char('A'), Text("Test")])]
+    #[case::multiple_ctrl_c(
+        "^c41Test^c42MoreText^c43",
+        vec![Char('A'), Text("Test"), Char('B'), Text("MoreText"), Char('C')]
+    )]
+    #[case::invalid_hex_ctrl_c("^cZZTest", vec![Text("^cZZ"), Text("Test")])]
     #[case::ctrl_r_toggle(
         "^rReverseText^rNormalText",
         vec![Reverse(true), Text("ReverseText"), Reverse(false), Text("NormalText")]
