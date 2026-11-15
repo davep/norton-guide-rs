@@ -82,7 +82,7 @@ impl ParseState {
     }
 
     fn work_left(&self) -> bool {
-        self.ctrl.is_some() && self.ctrl.unwrap() < self.raw.len()
+        self.ctrl.is_some_and(|ctrl| ctrl < self.raw.len())
     }
 
     fn ctrl_id(&self) -> Option<ControlCode> {
@@ -90,11 +90,7 @@ impl ParseState {
     }
 
     fn move_ctrl(&mut self, count: usize) {
-        if let Some(ctrl) = self.ctrl {
-            self.ctrl = Some(ctrl + count);
-        } else {
-            self.ctrl = Some(count);
-        }
+        self.ctrl = Some(self.ctrl.unwrap_or(0) + count);
     }
 
     fn find_next_ctrl(&mut self) {
