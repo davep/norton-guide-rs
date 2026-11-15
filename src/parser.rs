@@ -71,18 +71,12 @@ pub enum ParseEvent<'a> {
     Char(char),
     /// Reset text mode back to normal (`^n` or toggled colour attribute).
     Normal,
-    /// Enable bold mode (`^b`).
-    Bold,
-    /// Disable bold mode (`^b` when already bold).
-    Unbold,
-    /// Enable reverse video mode (`^r`).
-    Reverse,
-    /// Disable reverse video mode (`^r` when already reversed).
-    Unreverse,
-    /// Enable underline mode (`^u`).
-    Underline,
-    /// Disable underline mode (`^u` when already underlined).
-    Ununderline,
+    /// Enable/disable bold mode (`^b`).
+    Bold(bool),
+    /// Enable/disable reverse video mode (`^r`).
+    Reverse(bool),
+    /// Enable/disable underline mode (`^u`).
+    Underline(bool),
 }
 
 /// Parser for Norton Guide text lines.
@@ -151,10 +145,10 @@ impl<'a> Parser<'a> {
         self.advance(2);
         if self.mode == TextMode::Bold {
             self.mode = TextMode::Normal;
-            ParseEvent::Unbold
+            ParseEvent::Bold(false)
         } else {
             self.mode = TextMode::Bold;
-            ParseEvent::Bold
+            ParseEvent::Bold(true)
         }
     }
 
@@ -173,10 +167,10 @@ impl<'a> Parser<'a> {
         self.advance(2);
         if self.mode == TextMode::Reverse {
             self.mode = TextMode::Normal;
-            ParseEvent::Unreverse
+            ParseEvent::Reverse(false)
         } else {
             self.mode = TextMode::Reverse;
-            ParseEvent::Reverse
+            ParseEvent::Reverse(true)
         }
     }
 
@@ -184,10 +178,10 @@ impl<'a> Parser<'a> {
         self.advance(2);
         if self.mode == TextMode::Underline {
             self.mode = TextMode::Normal;
-            ParseEvent::Ununderline
+            ParseEvent::Underline(false)
         } else {
             self.mode = TextMode::Underline;
-            ParseEvent::Underline
+            ParseEvent::Underline(true)
         }
     }
 }
@@ -275,19 +269,19 @@ mod tests {
     )]
     #[case::ctrl_b_toggle(
         "^bBoldText^bNormalText",
-        vec![Bold, Text("BoldText"), Unbold, Text("NormalText")]
+        vec![Bold(true), Text("BoldText"), Bold(false), Text("NormalText")]
     )]
     #[case::ctrl_r_toggle(
         "^rReverseText^rNormalText",
-        vec![Reverse, Text("ReverseText"), Unreverse, Text("NormalText")]
+        vec![Reverse(true), Text("ReverseText"), Reverse(false), Text("NormalText")]
     )]
     #[case::ctrl_u_toggle(
         "^uUnderlineText^uNormalText",
-        vec![Underline, Text("UnderlineText"), Ununderline, Text("NormalText")]
+        vec![Underline(true), Text("UnderlineText"), Underline(false), Text("NormalText")]
     )]
     #[case::many_ctrls(
         "^bBold^rReverse^uUnderline^nNormal",
-        vec![Bold, Text("Bold"), Reverse, Text("Reverse"), Underline, Text("Underline"), Normal, Text("Normal")]
+        vec![Bold(true), Text("Bold"), Reverse(true), Text("Reverse"), Underline(true), Text("Underline"), Normal, Text("Normal")]
     )]
     #[case::unsupported_ctrl(
         "^xUnsupported^yUnsupported",
