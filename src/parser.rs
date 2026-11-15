@@ -362,6 +362,7 @@ mod tests {
     #[case::ctrl_r_toggle("^rReverseText^rNormalText", vec!["reverse", "unreverse"], vec!["ReverseText", "NormalText"])]
     #[case::ctrl_u_toggle("^uUnderlineText^uNormalText", vec!["underline", "ununderline"], vec!["UnderlineText", "NormalText"])]
     #[case::many_ctrls("^bBold^rReverse^uUnderline^nNormal", vec!["bold", "reverse", "underline", "normal"], vec!["Bold", "Reverse", "Underline", "Normal"])]
+    #[case::unsupported_ctrl("^xUnsupported^yUnsupported", vec![], vec!["xUnsupported", "yUnsupported"])]
     fn test_control_characters(
         #[case] input: &str,
         #[case] expected_events: Vec<&str>,
