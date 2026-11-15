@@ -110,15 +110,11 @@ pub trait ParserEvents {
 
 pub struct Parser<'a, E: ParserEvents> {
     events: &'a mut E,
-    string: String,
 }
 
 impl<'a, E: ParserEvents> Parser<'a, E> {
-    pub fn new(string: impl Into<String>, events: &'a mut E) -> Self {
-        Self {
-            events,
-            string: string.into(),
-        }
+    pub fn new(events: &'a mut E) -> Self {
+        Self { events }
     }
 
     fn normal(&mut self, state: &mut ParseState) {
@@ -199,8 +195,8 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
         state.move_ctrl(2);
     }
 
-    pub fn parse(&mut self) -> &Self {
-        let mut state = ParseState::new(self.string.clone());
+    pub fn parse(&mut self, string: &str) -> &Self {
+        let mut state = ParseState::new(string);
 
         // Process the text until there are no more control codes to handle.
         while let Some(ctrl_index) = state.ctrl {
@@ -345,7 +341,7 @@ mod tests {
         #[case] expected_text: Vec<&str>,
     ) {
         let mut events = ParserEventsMock::new();
-        Parser::new(input, &mut events).parse();
+        Parser::new(&mut events).parse(input);
         assert_eq!(events.events, expected_events);
         assert_eq!(events.text, expected_text);
     }
