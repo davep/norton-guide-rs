@@ -109,146 +109,145 @@ pub trait ParserEvents {
 }
 
 pub struct Parser<'a, E: ParserEvents> {
-    state: ParseState,
     events: &'a mut E,
+    string: String,
 }
 
 impl<'a, E: ParserEvents> Parser<'a, E> {
     pub fn new(string: impl Into<String>, events: &'a mut E) -> Self {
         Self {
-            state: ParseState::new(string),
             events,
+            string: string.into(),
         }
     }
 
-    fn normal(&mut self) {
+    fn normal(&mut self, state: &mut ParseState) {
         self.events.on_normal();
-        self.state.mode = TextMode::Normal;
-        self.state.last_attribute = None;
+        state.mode = TextMode::Normal;
+        state.last_attribute = None;
     }
 
-    fn ctrl_a(&mut self) {
-        let ctrl_index = self
-            .state
+    fn ctrl_a(&mut self, state: &mut ParseState) {
+        let ctrl_index = state
             .ctrl
             .expect("unexpected lack of control character to handle");
-        if let Some(colour) = self
-            .state
+        if let Some(colour) = state
             .raw
             .get(ctrl_index + 2..ctrl_index + 4)
             .and_then(|hex| u8::from_str_radix(hex, 16).ok())
         {
-            if self.state.mode == TextMode::Attribute && self.state.last_attribute == Some(colour) {
+            if state.mode == TextMode::Attribute && state.last_attribute == Some(colour) {
                 // If a colour attribute is already active and the same
                 // colour is being applied again, we will treat it as a
                 // toggle and return to normal mode.
-                self.normal();
+                self.normal(state);
             } else {
                 // If a new colour attribute is being applied.
                 self.events.on_colour(colour);
-                self.state.last_attribute = Some(colour);
-                self.state.mode = TextMode::Attribute;
+                state.last_attribute = Some(colour);
+                state.mode = TextMode::Attribute;
             }
         } else {
             // The hex for the attribute is not valid, so we'll treat it as
             // a literal string instead of a control code.
-            self.events.on_text(&self.state.raw[..4]);
+            self.events.on_text(&state.raw[..4]);
         }
-        self.state.move_ctrl(4);
+        state.move_ctrl(4);
     }
 
-    fn ctrl_b(&mut self) {
-        if self.state.mode == TextMode::Bold {
+    fn ctrl_b(&mut self, state: &mut ParseState) {
+        if state.mode == TextMode::Bold {
             self.events.on_unbold();
-            self.state.mode = TextMode::Normal;
+            state.mode = TextMode::Normal;
         } else {
             self.events.on_bold();
-            self.state.mode = TextMode::Bold;
+            state.mode = TextMode::Bold;
         }
-        self.state.move_ctrl(2);
+        state.move_ctrl(2);
     }
 
-    fn ctrl_c(&mut self) {
+    fn ctrl_c(&mut self, _state: &mut ParseState) {
         // TODO!
         panic!("Control code ^c is not yet implemented");
         // Handle character control code
     }
 
-    fn ctrl_n(&mut self) {
-        self.normal();
-        self.state.move_ctrl(2);
+    fn ctrl_n(&mut self, state: &mut ParseState) {
+        self.normal(state);
+        state.move_ctrl(2);
     }
 
-    fn ctrl_r(&mut self) {
-        if self.state.mode == TextMode::Reverse {
+    fn ctrl_r(&mut self, state: &mut ParseState) {
+        if state.mode == TextMode::Reverse {
             self.events.on_unreverse();
-            self.state.mode = TextMode::Normal;
+            state.mode = TextMode::Normal;
         } else {
             self.events.on_reverse();
-            self.state.mode = TextMode::Reverse;
+            state.mode = TextMode::Reverse;
         }
-        self.state.move_ctrl(2);
+        state.move_ctrl(2);
     }
 
-    fn ctrl_u(&mut self) {
-        if self.state.mode == TextMode::Underline {
+    fn ctrl_u(&mut self, state: &mut ParseState) {
+        if state.mode == TextMode::Underline {
             self.events.on_ununderline();
-            self.state.mode = TextMode::Normal;
+            state.mode = TextMode::Normal;
         } else {
             self.events.on_underline();
-            self.state.mode = TextMode::Underline;
+            state.mode = TextMode::Underline;
         }
-        self.state.move_ctrl(2);
+        state.move_ctrl(2);
     }
 
     pub fn parse(&mut self) -> &Self {
-        // Process the text until there are no more control codes to handle.
-        while let Some(ctrl_index) = self.state.ctrl {
+        let mut state = ParseState::new(self.string.clone());
 
+        // Process the text until there are no more control codes to handle.
+        while let Some(ctrl_index) = state.ctrl {
             // If there is text before the control code, send it to the event handler.
             if ctrl_index > 0 {
-                self.events.on_text(&self.state.raw[..ctrl_index]);
+                self.events.on_text(&state.raw[..ctrl_index]);
             }
 
             // Handle the control code based on its type.
-            match self.state.ctrl_id() {
+            match state.ctrl_id() {
                 Some(ControlCode::Attr) => {
-                    self.ctrl_a();
+                    self.ctrl_a(&mut state);
                 }
                 Some(ControlCode::Bold) => {
-                    self.ctrl_b();
+                    self.ctrl_b(&mut state);
                 }
                 Some(ControlCode::Char) => {
-                    self.ctrl_c();
+                    self.ctrl_c(&mut state);
                 }
                 Some(ControlCode::Normal) => {
-                    self.ctrl_n();
+                    self.ctrl_n(&mut state);
                 }
                 Some(ControlCode::Reverse) => {
-                    self.ctrl_r();
+                    self.ctrl_r(&mut state);
                 }
                 Some(ControlCode::Underline) => {
-                    self.ctrl_u();
+                    self.ctrl_u(&mut state);
                 }
                 Some(ControlCode::Control) => {
                     self.events.on_text("^");
-                    self.state.move_ctrl(2);
+                    state.move_ctrl(2);
                 }
                 Some(ControlCode::Unsupported) | None => {
                     // So the character after the ^ is not a valid control
                     // code. The choices here are to either raise an error,
                     // or just ignore it. Given that nobody is going to be
                     // fixing broken guides these days, we'll just ignore it.
-                    self.state.move_ctrl(1);
+                    state.move_ctrl(1);
                 }
             }
 
-            self.state.find_next_ctrl();
+            state.find_next_ctrl();
         }
 
         // Sweep up any remaining text after the last control code.
-        if !self.state.raw.is_empty() {
-            self.events.on_text(&self.state.raw);
+        if !state.raw.is_empty() {
+            self.events.on_text(&state.raw);
         }
 
         self
@@ -325,28 +324,6 @@ mod tests {
         fn on_colour(&mut self, colour: u8) {
             self.events.push(format!("colour(0x{colour:X})"));
         }
-    }
-
-    #[rstest]
-    fn test_initial_parser_state_no_ctrl() {
-        const TEST_STRING: &str = "This is a test string without control characters.";
-        let mut events = ParserEventsMock::new();
-        let parser = Parser::new(TEST_STRING, &mut events);
-        assert_eq!(parser.state.raw, TEST_STRING);
-        assert_eq!(parser.state.ctrl, None);
-        assert!(matches!(parser.state.mode, TextMode::Normal));
-        assert_eq!(parser.state.last_attribute, None);
-    }
-
-    #[rstest]
-    fn test_initial_parser_state_with_ctrl() {
-        const TEST_STRING: &str = "This is a ^btest^b string with a control character.";
-        let mut events = ParserEventsMock::new();
-        let parser = Parser::new(TEST_STRING, &mut events);
-        assert_eq!(parser.state.raw, TEST_STRING);
-        assert_eq!(parser.state.ctrl, Some(10)); // Index of the first control character '^'
-        assert!(matches!(parser.state.mode, TextMode::Normal));
-        assert_eq!(parser.state.last_attribute, None);
     }
 
     #[rstest]
