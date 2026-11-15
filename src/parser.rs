@@ -3,6 +3,8 @@
 //! This module contains the parser for the text inside a Norton Guide. It
 //! is used to parse the text and convert it into a more usable format.
 
+use crate::dosify::from_dos_char;
+
 /// The character that marks an upcoming attribute.
 const CTRL_CHAR: char = '^';
 
@@ -101,7 +103,10 @@ impl<'a> Parser<'a> {
 
     /// Return the [`ControlCode`] following a leading `^`, if any.
     fn ctrl_code(&self) -> ControlCode {
-        self.raw.chars().nth(1).map_or(ControlCode::Unsupported, ControlCode::from)
+        self.raw
+            .chars()
+            .nth(1)
+            .map_or(ControlCode::Unsupported, ControlCode::from)
     }
 
     /// Advance the unparsed slice by `count` bytes.
@@ -119,8 +124,22 @@ impl<'a> Parser<'a> {
         u8::from_str_radix(self.raw.get(2..4)?, 16).ok()
     }
 
+    /// Consume up to 4 characters as literal text when a 4-character control
+    /// code (`^aXX` or `^cXX`) has invalid hex digits.
+    fn invalid_hex_ctrl(&mut self) -> ParseEvent<'a> {
+        let byte_len = self
+            .raw
+            .char_indices()
+            .nth(4)
+            .map_or(self.raw.len(), |(idx, _)| idx);
+        let text = &self.raw[..byte_len];
+        self.advance(byte_len);
+        ParseEvent::Text(text)
+    }
+
     fn ctrl_a(&mut self) -> ParseEvent<'a> {
-        let event = if let Some(colour) = self.parse_hex_byte() {
+        if let Some(colour) = self.parse_hex_byte() {
+            self.advance(4);
             if self.mode == TextMode::Attribute && self.last_attribute == Some(colour) {
                 // If a colour attribute is already active and the same
                 // colour is being applied again, we will treat it as a
@@ -135,10 +154,8 @@ impl<'a> Parser<'a> {
         } else {
             // The hex for the attribute is not valid, so we'll treat it as
             // a literal string instead of a control code.
-            ParseEvent::Text(&self.raw[..4.min(self.raw.len())])
-        };
-        self.advance(4);
-        event
+            self.invalid_hex_ctrl()
+        }
     }
 
     fn ctrl_b(&mut self) -> ParseEvent<'a> {
@@ -153,15 +170,14 @@ impl<'a> Parser<'a> {
     }
 
     fn ctrl_c(&mut self) -> ParseEvent<'a> {
-        let event = if let Some(ch) = self.parse_hex_byte() {
-            ParseEvent::Char(ch as char)
+        if let Some(ch) = self.parse_hex_byte() {
+            self.advance(4);
+            ParseEvent::Char(from_dos_char(ch))
         } else {
             // The hex for the character is not valid, so we'll treat it as
             // a literal string instead of a control code.
-            ParseEvent::Text(&self.raw[..4.min(self.raw.len())])
-        };
-        self.advance(4);
-        event
+            self.invalid_hex_ctrl()
+        }
     }
 
     fn ctrl_n(&mut self) -> ParseEvent<'a> {

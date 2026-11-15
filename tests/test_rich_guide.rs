@@ -30,20 +30,12 @@ fn test_os_lib_title(os_lib: NortonGuide) {
 fn test_os_lib_credits(os_lib: NortonGuide) {
     assert_eq!(
         os_lib.credits(),
-        // &[
-        //     "│ OSLIB v1.06",
-        //     "│ OSLIB Is Free Software with NO WARRANTY!",
-        //     "│",
-        //     "│ This library was compiled by Dave Pearson.",
-        //     "│ davep@hagbard.demon.co.uk",
-        // ]
-        // TODO: Need to adding undosify support.
         &[
-            "� OSLIB v1.06",
-            "� OSLIB Is Free Software with NO WARRANTY!",
-            "�",
-            "� This library was compiled by Dave Pearson.",
-            "� davep@hagbard.demon.co.uk",
+            "│ OSLIB v1.06",
+            "│ OSLIB Is Free Software with NO WARRANTY!",
+            "│",
+            "│ This library was compiled by Dave Pearson.",
+            "│ davep@hagbard.demon.co.uk",
         ]
     );
 }

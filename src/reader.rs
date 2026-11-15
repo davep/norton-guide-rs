@@ -11,6 +11,7 @@ use std::fs::File;
 use std::io::{self, Read, Seek, SeekFrom};
 use std::path::Path;
 
+use crate::dosify::make_dos_like;
 use crate::rle::RleFn;
 
 /// The `Reader` struct is a wrapper around a file handle that provides
@@ -48,8 +49,7 @@ fn decrypt(buffer: &mut [u8]) {
 ///   present.
 #[inline]
 fn null_string(buffer: &[u8]) -> String {
-    String::from_utf8_lossy(&buffer[..buffer.iter().position(|&b| b == 0).unwrap_or(buffer.len())])
-        .to_string()
+    make_dos_like(&buffer[..buffer.iter().position(|&b| b == 0).unwrap_or(buffer.len())])
 }
 
 /// Implementations for the `Reader` struct.

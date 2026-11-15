@@ -1,3 +1,4 @@
+pub mod dosify;
 pub mod entry;
 pub mod errors;
 pub mod guide;
