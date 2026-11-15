@@ -81,10 +81,6 @@ impl ParseState {
         }
     }
 
-    fn work_left(&self) -> bool {
-        self.ctrl.is_some_and(|ctrl| ctrl < self.raw.len())
-    }
-
     fn ctrl_id(&self) -> Option<ControlCode> {
         ControlCode::try_from(self.raw.chars().nth(self.ctrl? + 1)?).ok()
     }
@@ -206,15 +202,15 @@ impl<'a, E: ParserEvents> Parser<'a, E> {
     }
 
     pub fn parse(&mut self) -> &Self {
-        while self.state.work_left() {
-            let ctrl_index = self
-                .state
-                .ctrl
-                .expect("unexpected lack of control character to handle");
+        // Process the text until there are no more control codes to handle.
+        while let Some(ctrl_index) = self.state.ctrl {
+
+            // If there is text before the control code, send it to the event handler.
             if ctrl_index > 0 {
                 self.events.on_text(&self.state.raw[..ctrl_index]);
             }
 
+            // Handle the control code based on its type.
             match self.state.ctrl_id() {
                 Some(ControlCode::Attr) => {
                     self.ctrl_a();
