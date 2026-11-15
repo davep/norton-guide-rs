@@ -319,8 +319,7 @@ mod tests {
     #[case::lone_dangling_ctrl("^", vec![])]
     #[case::dangling_ctrl("Test^", vec![Text("Test")])]
     fn test_control_characters(#[case] input: &str, #[case] expected: Vec<ParseEvent>) {
-        let events: Vec<ParseEvent> = Parser::new(input).collect();
-        assert_eq!(events, expected);
+        assert!(Parser::new(input).eq(expected));
     }
 }
 
