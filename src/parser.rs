@@ -69,8 +69,6 @@ pub enum ParseEvent<'a> {
     Text(&'a str),
     /// A foreground/background colour attribute (`^aXX`).
     Colour(u8),
-    /// A single character emitted by a character control code (`^cXX`).
-    Char(char),
     /// Reset text mode back to normal (`^n` or toggled colour attribute).
     Normal,
     /// Enable/disable bold mode (`^b`).
@@ -172,7 +170,7 @@ impl<'a> Parser<'a> {
     fn ctrl_c(&mut self) -> ParseEvent<'a> {
         if let Some(ch) = self.parse_hex_byte() {
             self.advance(4);
-            ParseEvent::Char(from_dos_char(ch))
+            ParseEvent::Text(from_dos_char(ch))
         } else {
             // The hex for the character is not valid, so we'll treat it as
             // a literal string instead of a control code.
@@ -293,10 +291,10 @@ mod tests {
         "^bBoldText^bNormalText",
         vec![Bold(true), Text("BoldText"), Bold(false), Text("NormalText")]
     )]
-    #[case::single_ctrl_c("^c41Test", vec![Char('A'), Text("Test")])]
+    #[case::single_ctrl_c("^c41Test", vec![Text("A"), Text("Test")])]
     #[case::multiple_ctrl_c(
         "^c41Test^c42MoreText^c43",
-        vec![Char('A'), Text("Test"), Char('B'), Text("MoreText"), Char('C')]
+        vec![Text("A"), Text("Test"), Text("B"), Text("MoreText"), Text("C")]
     )]
     #[case::invalid_hex_ctrl_c("^cZZTest", vec![Text("^cZZ"), Text("Test")])]
     #[case::ctrl_r_toggle(
