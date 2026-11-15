@@ -29,19 +29,17 @@ enum ControlCode {
     Unsupported,
 }
 
-impl TryFrom<char> for ControlCode {
-    type Error = ();
-
-    fn try_from(value: char) -> Result<Self, Self::Error> {
+impl From<char> for ControlCode {
+    fn from(value: char) -> Self {
         match value {
-            'a' | 'A' => Ok(ControlCode::Attr),
-            'b' | 'B' => Ok(ControlCode::Bold),
-            'c' | 'C' => Ok(ControlCode::Char),
-            'n' | 'N' => Ok(ControlCode::Normal),
-            'r' | 'R' => Ok(ControlCode::Reverse),
-            'u' | 'U' => Ok(ControlCode::Underline),
-            CTRL_CHAR => Ok(ControlCode::Control),
-            _ => Ok(ControlCode::Unsupported),
+            'a' | 'A' => ControlCode::Attr,
+            'b' | 'B' => ControlCode::Bold,
+            'c' | 'C' => ControlCode::Char,
+            'n' | 'N' => ControlCode::Normal,
+            'r' | 'R' => ControlCode::Reverse,
+            'u' | 'U' => ControlCode::Underline,
+            CTRL_CHAR => ControlCode::Control,
+            _ => ControlCode::Unsupported,
         }
     }
 }
@@ -108,8 +106,8 @@ impl<'a> Parser<'a> {
     }
 
     /// Return the [`ControlCode`] following a leading `^`, if any.
-    fn ctrl_id(&self) -> Option<ControlCode> {
-        ControlCode::try_from(self.raw.chars().nth(1)?).ok()
+    fn ctrl_id(&self) -> ControlCode {
+        self.raw.chars().nth(1).map_or(ControlCode::Unsupported, ControlCode::from)
     }
 
     /// Advance the unparsed slice by `count` bytes.
@@ -215,18 +213,18 @@ impl<'a> Iterator for Parser<'a> {
                 }
                 // `self.raw` starts with '^': handle the control code.
                 Some(_) => match self.ctrl_id() {
-                    Some(ControlCode::Attr) => return Some(self.ctrl_a()),
-                    Some(ControlCode::Bold) => return Some(self.ctrl_b()),
-                    Some(ControlCode::Char) => return Some(self.ctrl_c()),
-                    Some(ControlCode::Normal) => return Some(self.ctrl_n()),
-                    Some(ControlCode::Reverse) => return Some(self.ctrl_r()),
-                    Some(ControlCode::Underline) => return Some(self.ctrl_u()),
-                    Some(ControlCode::Control) => {
+                    ControlCode::Attr => return Some(self.ctrl_a()),
+                    ControlCode::Bold => return Some(self.ctrl_b()),
+                    ControlCode::Char => return Some(self.ctrl_c()),
+                    ControlCode::Normal => return Some(self.ctrl_n()),
+                    ControlCode::Reverse => return Some(self.ctrl_r()),
+                    ControlCode::Underline => return Some(self.ctrl_u()),
+                    ControlCode::Control => {
                         let text = &self.raw[..CTRL_CHAR.len_utf8()];
                         self.advance(2);
                         return Some(ParseEvent::Text(text));
                     }
-                    Some(ControlCode::Unsupported) | None => {
+                    ControlCode::Unsupported => {
                         // So the character after the ^ is not a valid control
                         // code. The choices here are to either raise an error,
                         // or just ignore it. Given that nobody is going to be
@@ -260,7 +258,7 @@ mod tests {
         assert!(
             input
                 .iter()
-                .all(|&code| ControlCode::try_from(code) == Ok(expected))
+                .all(|&code| ControlCode::from(code) == expected)
         );
     }
 
