@@ -100,7 +100,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Return the [`ControlCode`] following a leading `^`, if any.
-    fn ctrl_id(&self) -> ControlCode {
+    fn ctrl_code(&self) -> ControlCode {
         self.raw.chars().nth(1).map_or(ControlCode::Unsupported, ControlCode::from)
     }
 
@@ -206,7 +206,7 @@ impl<'a> Iterator for Parser<'a> {
                     return Some(ParseEvent::Text(text));
                 }
                 // `self.raw` starts with '^': handle the control code.
-                Some(_) => match self.ctrl_id() {
+                Some(_) => match self.ctrl_code() {
                     ControlCode::Attr => return Some(self.ctrl_a()),
                     ControlCode::Bold => return Some(self.ctrl_b()),
                     ControlCode::Char => return Some(self.ctrl_c()),
