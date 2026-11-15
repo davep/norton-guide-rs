@@ -246,7 +246,7 @@ mod tests {
     #[case::normal(&['n', 'N'], ControlCode::Normal)]
     #[case::reverse(&['r', 'R'], ControlCode::Reverse)]
     #[case::underline(&['u', 'U'], ControlCode::Underline)]
-    #[case::control(&['^'], ControlCode::Control)]
+    #[case::control(&[CTRL_CHAR], ControlCode::Control)]
     #[case::unsupported(&['x', 'y', 'z'], ControlCode::Unsupported)]
     fn test_control_code_conversion(#[case] input: &[char], #[case] expected: ControlCode) {
         assert!(
