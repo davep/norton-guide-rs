@@ -47,4 +47,50 @@ impl TryFrom<Entry> for Long {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use crate::entry::parent::EntryParent;
+
+    use super::*;
+
+    #[test]
+    fn test_entry_conversion() {
+        let short_entry = Entry::Short(Short {
+            common: Common {
+                entry_type: EntryType::Short,
+                line_count: 1,
+                size: 10,
+                has_see_also: false,
+                parent: EntryParent::default(),
+                previous: 0,
+                next: 0,
+                offset: 0,
+            },
+            lines: vec!["Short entry line".to_string()],
+            offsets : vec![0],
+        });
+
+        let long_entry = Entry::Long(Long {
+            common: Common {
+                entry_type: EntryType::Long,
+                line_count: 2,
+                size: 20,
+                has_see_also: false,
+                parent: EntryParent::default(),
+                previous: 0,
+                next: 0,
+                offset: 0,
+            },
+            lines: vec!["Line 1".to_string(), "Line 2".to_string()],
+            see_also: None,
+        });
+
+        assert!(Short::try_from(short_entry.clone()).is_ok());
+        assert!(Long::try_from(long_entry.clone()).is_ok());
+        assert!(Long::try_from(short_entry).is_err());
+        assert!(Short::try_from(long_entry).is_err());
+
+    }
+}
+
 // mod.rs ends here
