@@ -34,4 +34,17 @@ impl EntryParent {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::rstest;
+
+    #[rstest]
+    #[case::does_not_exist(EntryParent::default(), false)]
+    #[case::does_exist(EntryParent { line: Some(1), offset: Some(2), menu: Some(3), prompt: Some(4) }, true)]
+    fn test_entry_parent(#[case] entry_parent: EntryParent, #[case] expected_exists: bool) {
+        assert_eq!(entry_parent.exists(), expected_exists);
+    }
+}
+
 // parent.rs ends here
