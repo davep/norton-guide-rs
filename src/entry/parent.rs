@@ -6,7 +6,7 @@ use crate::entry::optionals::{optional_index, optional_offset};
 use crate::reader::Reader;
 
 /// The `EntryParent` struct represents the parent entry of a Norton Guide entry.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct EntryParent {
     /// The line number of the parent entry.
     pub line: Option<u16>,
