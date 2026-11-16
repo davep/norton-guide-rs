@@ -67,7 +67,7 @@ mod tests {
                 offset: 0,
             },
             lines: vec!["Short entry line".to_string()],
-            offsets : vec![0],
+            offsets: vec![0],
         });
 
         let long_entry = Entry::Long(Long {
@@ -89,7 +89,6 @@ mod tests {
         assert!(Long::try_from(long_entry.clone()).is_ok());
         assert!(Long::try_from(short_entry).is_err());
         assert!(Short::try_from(long_entry).is_err());
-
     }
 }
 
