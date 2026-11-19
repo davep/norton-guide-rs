@@ -129,6 +129,12 @@ impl NortonGuide {
         &mut self.reader
     }
 
+    /// Loads the next entry from the Norton Guide database file.
+    ///
+    /// # Returns
+    /// * `Result<Entry, NortonGuideError>` - Returns an `Ok(Entry)`
+    ///   if successful, or an `Err(NortonGuideError)` if reading the entry
+    ///   fails or if the entry type is unexpected.
     pub fn load(&mut self) -> Result<Entry, NortonGuideError> {
         let position = self.reader().position()?;
         let common = Common::new(self.reader())?;
@@ -143,6 +149,12 @@ impl NortonGuide {
         result
     }
 
+    /// Skips the next entry in the Norton Guide database file.
+    ///
+    /// # Returns
+    /// * `Result<&mut Self, NortonGuideError>` - Returns an `Ok(&mut Self)`
+    ///   if successful, or an `Err(NortonGuideError)` if reading the entry
+    ///   type fails or if the entry type is unexpected.
     pub fn skip(&mut self) -> Result<&mut Self, NortonGuideError> {
         let entry_type = self.reader.read_encrypted_word()?;
         if EntryType::try_from(entry_type).is_err() {
