@@ -28,6 +28,17 @@ pub enum Entry {
 impl TryFrom<Entry> for Short {
     type Error = NortonGuideError;
 
+    /// Attempts to convert an `Entry` into a `Short` entry.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The `Entry` to convert.
+    ///
+    /// # Returns
+    ///
+    /// * `Result<Self, Self::Error>` - Returns an `Ok(Short)` if the
+    ///   conversion is successful, or an `Err(NortonGuideError)` if the
+    ///   entry isnot a short entry.
     fn try_from(value: Entry) -> Result<Self, Self::Error> {
         match value {
             Entry::Short(short) => Ok(short),
@@ -39,6 +50,17 @@ impl TryFrom<Entry> for Short {
 impl TryFrom<Entry> for Long {
     type Error = NortonGuideError;
 
+    /// Attempts to convert an `Entry` into a `Long` entry.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The `Entry` to convert.
+    ///
+    /// # Returns
+    ///
+    /// * `Result<Self, Self::Error>` - Returns an `Ok(Long)` if the
+    ///   conversion is successful, or an `Err(NortonGuideError)` if the
+    ///   entry is not a long entry.
     fn try_from(value: Entry) -> Result<Self, Self::Error> {
         match value {
             Entry::Long(long) => Ok(long),
