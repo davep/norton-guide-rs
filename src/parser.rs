@@ -89,8 +89,19 @@ pub struct Parser<'a> {
     last_attribute: Option<u8>,
 }
 
+/// The `Parser` struct is responsible for parsing the text of a Norton
+/// Guide and emitting events that represent the different control codes and
+/// text modes.
 impl<'a> Parser<'a> {
     /// Create a new parser for the given string slice.
+    ///
+    /// # Arguments
+    ///
+    /// * `raw` - A string slice containing the text to be parsed.
+    ///
+    /// # Returns
+    ///
+    /// A new instance of the `Parser` struct.
     pub fn new(raw: &'a str) -> Self {
         Self {
             raw,
@@ -112,12 +123,15 @@ impl<'a> Parser<'a> {
         self.raw = &self.raw[count.min(self.raw.len())..];
     }
 
+    /// Reset the parser to normal text mode.
     fn normal(&mut self) -> ParseEvent<'a> {
         self.mode = TextMode::Normal;
         self.last_attribute = None;
         ParseEvent::Normal
     }
 
+    /// Parse the next two characters as a hex byte, returning `None` if
+    /// they are not valid hex digits.
     fn parse_hex_byte(&mut self) -> Option<u8> {
         u8::from_str_radix(self.raw.get(2..4)?, 16).ok()
     }
@@ -135,6 +149,7 @@ impl<'a> Parser<'a> {
         ParseEvent::Text(text)
     }
 
+    /// Handle the `^aXX` control code for foreground/background colour attributes.
     fn ctrl_a(&mut self) -> ParseEvent<'a> {
         if let Some(colour) = self.parse_hex_byte() {
             self.advance(4);
@@ -156,6 +171,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Handle the `^b` control code for toggling bold text mode.
     fn ctrl_b(&mut self) -> ParseEvent<'a> {
         self.advance(2);
         if self.mode == TextMode::Bold {
@@ -167,6 +183,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Handle the `^cXX` control code for inserting a character by its hex code.
     fn ctrl_c(&mut self) -> ParseEvent<'a> {
         if let Some(ch) = self.parse_hex_byte() {
             self.advance(4);
@@ -178,11 +195,13 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Handle the `^n` control code for resetting to normal text mode.
     fn ctrl_n(&mut self) -> ParseEvent<'a> {
         self.advance(2);
         self.normal()
     }
 
+    /// Handle the `^r` control code for toggling reverse video text mode.
     fn ctrl_r(&mut self) -> ParseEvent<'a> {
         self.advance(2);
         if self.mode == TextMode::Reverse {
@@ -194,6 +213,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Handle the `^u` control code for toggling underline text mode.
     fn ctrl_u(&mut self) -> ParseEvent<'a> {
         self.advance(2);
         if self.mode == TextMode::Underline {
@@ -206,9 +226,14 @@ impl<'a> Parser<'a> {
     }
 }
 
+/// Implement the `Iterator` trait for the `Parser` struct, allowing it to
+/// yield a stream of `ParseEvent` items as it scans through the text and
+/// its control codes.
 impl<'a> Iterator for Parser<'a> {
     type Item = ParseEvent<'a>;
 
+    /// Return the next `ParseEvent` from the parser, or `None` if there are
+    /// no more events to emit.
     fn next(&mut self) -> Option<Self::Item> {
         while !self.raw.is_empty() {
             match self.raw.find(CTRL_CHAR) {
