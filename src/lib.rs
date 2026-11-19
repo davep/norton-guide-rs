@@ -10,3 +10,5 @@ pub mod rle;
 
 pub use errors::NortonGuideError;
 pub use guide::NortonGuide;
+
+// lib.rs ends here
