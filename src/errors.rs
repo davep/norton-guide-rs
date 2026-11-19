@@ -9,6 +9,7 @@ pub enum NortonGuideError {
     #[error("unexpected magic number {found:?}")]
     BadMagicError { found: u16 },
 
+    /// Error variant for an unexpected entry type in the Norton Guide file.
     #[error("unexpected entry type {found:?}")]
     UnexpectedEntryTypeError { found: u16 },
 
@@ -16,9 +17,11 @@ pub enum NortonGuideError {
     #[error("unexpected entry type: expected {expected}, found {found}")]
     BadEntryTypeError { expected: u16, found: u16 },
 
+    /// Error variant used when a short entry is expected but a long entry is found.
     #[error("entry is not a short entry")]
     NotShortError,
 
+    /// Error variant used when a long entry is expected but a short entry is found.
     #[error("entry is not a long entry")]
     NotLongError,
 
