@@ -66,6 +66,19 @@ fn test_menu_prompt_count(os_lib: NortonGuide) {
 }
 
 #[rstest]
+fn test_menu_prompt(os_lib: NortonGuide) {
+    assert_eq!(
+        os_lib.menu(0).unwrap().prompt(0).unwrap(),
+        "Functions"
+    );
+}
+
+#[rstest]
+fn test_menu_offset(os_lib: NortonGuide) {
+    assert_eq!(os_lib.menu(0).unwrap().offset(0).unwrap(), 525);
+}
+
+#[rstest]
 fn test_first_entry_is_short(mut os_lib: NortonGuide) {
     assert!(matches!(os_lib.load().unwrap(), Entry::Short(_)));
 }
