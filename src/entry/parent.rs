@@ -20,6 +20,17 @@ pub struct EntryParent {
 
 /// Implementations for the `EntryParent` struct.
 impl EntryParent {
+    /// Creates and populates a new `EntryParent` instance.
+    ///
+    /// # Arguments
+    ///
+    /// * `guide` - A mutable reference to a `Reader` that reads from the
+    ///   Norton Guide database file.
+    ///
+    /// # Returns
+    ///
+    /// * `io::Result<Self>` - Returns an `Ok(EntryParent)` if successful,
+    ///   or an `Err(io::Error)` if reading fails.
     pub fn new(guide: &mut Reader) -> io::Result<Self> {
         Ok(Self {
             line: optional_index(guide.read_encrypted_word()?),
@@ -29,6 +40,7 @@ impl EntryParent {
         })
     }
 
+    /// Checks if the parent entry exists.
     pub fn exists(&self) -> bool {
         self.offset.is_some()
     }

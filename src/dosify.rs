@@ -36,7 +36,16 @@ pub const fn from_dos_char(byte: u8) -> &'static str {
     CP437_STR[byte as usize]
 }
 
-/// Try and make a slice of bytes from a guide capable of retaining DOS-likeness.
+/// Try and make a slice of bytes from a guide capable of retaining
+/// DOS-likeness.
+///
+/// # Arguments
+///
+/// * `bytes` - A slice of bytes to convert.
+///
+/// # Returns
+///
+/// * `String` - A string representation of the DOS-like characters.
 pub fn make_dos_like(bytes: &[u8]) -> String {
     bytes.iter().copied().map(from_dos_char).collect()
 }
