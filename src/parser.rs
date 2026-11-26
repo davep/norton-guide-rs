@@ -31,7 +31,22 @@ enum ControlCode {
     Unsupported,
 }
 
+/// Implement the `From<char>` trait for `ControlCode` to allow conversion
+/// from a `char` to a `ControlCode`.
 impl From<char> for ControlCode {
+    /// The `from` function converts a `char` to a `ControlCode`. It matches
+    /// the character against known control code characters and returns the
+    /// corresponding `ControlCode` variant. If the character does not match
+    /// any known control code, it returns `ControlCode::Unsupported`.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The character to convert to a `ControlCode`.
+    ///
+    /// # Returns
+    ///
+    /// * `ControlCode` - The corresponding `ControlCode` variant for the
+    ///   given character.
     fn from(value: char) -> Self {
         match value {
             'a' | 'A' => ControlCode::Attr,
