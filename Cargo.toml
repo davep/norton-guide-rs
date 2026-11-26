@@ -5,7 +5,6 @@ edition = "2024"
 authors = ["Dave Pearson"]
 description = "Norton Guide database reading library"
 license-file = "LICENSE"
-homepage = "https://github.com/davep/norton-guide-rs"
 repository = "https://github.com/davep/norton-guide-rs"
 readme = "README.md"
 
